@@ -1,0 +1,19 @@
+[
+    {
+        "arguments": [
+            "/usr/bin/c++",
+            "-I/home/yurii-sahaidak/ucu/6_semester/CPP_CPlusPlus/linear_algebra_lib/include",
+            "-g",
+            "-std=gnu++20",
+            "-fdiagnostics-color=always",
+            "-Wextra",
+            "-Werror=vla",
+            "-DPVS_STUDIO",
+            "-DPVS_VERSION_MAJOR=7",
+            "-DPVS_VERSION_MINOR=35",
+            "/home/yurii-sahaidak/ucu/6_semester/CPP_CPlusPlus/linear_algebra_lib/src/main.cpp"
+        ],
+        "dependencies": [],
+        "id": 1
+    }
+]
