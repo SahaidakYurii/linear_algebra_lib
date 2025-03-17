@@ -24,13 +24,13 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
 
 
-    ndmatrix<int, 3> A{4, 3, 3};
+    ndmatrix<int, 3> С{4, 3, 3};
 
     size_t i = 0;
     for (size_t r = 0; r < 4; r++) {
         for (size_t c = 0; c < 3; c++) {
             for (size_t k = 0; k < 3; k++) {
-                A(r, c, k) = i++;
+                С(r, c, k) = i++;
             }
         }
     }
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     for (size_t r = 0; r < 4; r++) {
         for (size_t c = 0; c < 3; c++) {
             for (size_t k = 0; k < 3; k++) {
-                std::cout << A(r, c, k) << " ";
+                std::cout << С(r, c, k) << " ";
             }
             std::cout << std::endl;
         }
