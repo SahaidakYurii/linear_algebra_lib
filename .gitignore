@@ -2,6 +2,7 @@
 # Prerequisites
 *.d
 cmake*
+.PVS-Studio
 
 # Compiled Object files
 *.slo
