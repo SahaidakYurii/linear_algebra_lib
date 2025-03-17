@@ -1,6 +1,7 @@
 ### C++ ###
 # Prerequisites
 *.d
+./cmake*
 
 # Compiled Object files
 *.slo
