@@ -57,7 +57,7 @@ include(cmake/CompilerWarnings.cmake)
 #! Project main executable source compilation
 add_executable(${PROJECT_NAME}
 		src/main.cpp
-		include/matrix.h)
+		include/matrix.h include/ndmatrix.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
