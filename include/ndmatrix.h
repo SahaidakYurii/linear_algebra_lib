@@ -50,6 +50,25 @@ public:
         data_m.resize(total_size());
     }
 
+    ndmatrix<T, N>& reshape(std::initializer_list<size_t> new_dims) {
+        if (new_dims.size() != N) {
+            throw std::invalid_argument("Dimension size does not match template parameter N.");
+        }
+
+        size_t new_total_size = 1;
+        for (auto dim : new_dims) {
+            new_total_size *= dim;
+        }
+
+        if (new_total_size != total_size()) {
+            throw std::invalid_argument("New shape must have the same total size as the current shape.");
+        }
+
+        std::copy(new_dims.begin(), new_dims.end(), dims_m.begin());
+
+        return *this;
+    }
+
     template <typename... Indices>
     T& operator()(Indices... indices) {
         return data_m[calculate_index(0, indices...)];
@@ -59,6 +78,8 @@ public:
     const T& operator()(Indices... indices) const {
         return data_m[calculate_index(0, indices...)];
     }
+
+
 
     std::array<size_t, N> shape() const { return dims_m; }
 };

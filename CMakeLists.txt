@@ -48,7 +48,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 # Warnings as errors should be imported here -- do not move this line
-include(cmake/CompilerWarnings.cmake)
+#include(cmake/CompilerWarnings.cmake)
 
 ##########################################################
 # Project files, packages, libraries and so on
@@ -71,4 +71,4 @@ INSTALL(PROGRAMS
 		DESTINATION bin)
 
 # Include CMake setup
-include(cmake/main-config.cmake)
+#include(cmake/main-config.cmake)

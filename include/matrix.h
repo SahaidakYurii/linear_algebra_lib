@@ -43,6 +43,7 @@ public:
         rows_m = rows; cols_m = cols;
         data_m = temp_data;
     }
+
     std::string toString() {
         std::stringstream ss;
         for (size_t r = 0; r < rows_m; r++) {
