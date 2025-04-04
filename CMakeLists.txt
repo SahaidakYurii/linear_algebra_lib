@@ -53,6 +53,14 @@ endif ()
 ##########################################################
 # Project files, packages, libraries and so on
 ##########################################################
+include(FetchContent)
+
+FetchContent_Declare(
+		googletest
+		URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+)
+FetchContent_MakeAvailable(googletest)
+
 
 #! Project main executable source compilation
 add_executable(${PROJECT_NAME}
@@ -60,6 +68,16 @@ add_executable(${PROJECT_NAME}
 		include/matrix.h include/ndmatrix.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
+
+# Define the test executable
+add_executable(tests
+		tests/test_main.cpp
+)
+
+target_include_directories(tests PRIVATE include)
+target_link_libraries(tests gtest_main gtest)
+
+
 
 ##########################################################
 # Fixed CMakeLists.txt part
