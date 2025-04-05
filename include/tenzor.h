@@ -12,7 +12,8 @@
 #include <cmath>
 
 template <typename T, size_t N>
-class tenzor<T, N> {
+class tenzor {
+protected:
     std::vector<T> data_m;
     std::array<size_t, N> dims_m;
 

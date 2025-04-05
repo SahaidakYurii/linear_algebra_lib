@@ -1,6 +1,7 @@
 #include <iostream>
 #include "matrix.h"
 #include "tenzor.h"
+#include "squareMatrix.h"
 
 
 int main(int argc, char* argv[]) {
@@ -83,4 +84,8 @@ int main(int argc, char* argv[]) {
         std::cout << "---------------------" << std::endl;
         std::cout << std::endl;
     }
+
+    squareMatrix<int> square{3, {1, 0, 0, 0, 1, 0, 0, 0, 1}};
+
+    std::cout << square.determinant() << std::endl;
 }
