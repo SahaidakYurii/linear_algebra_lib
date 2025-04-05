@@ -34,13 +34,7 @@ public:
         a(other.cols_m < other.rows_m ? other.cols_m : other.rows_m)
             {}
 
-    bool isSquare() {
-        return this->rows_m == this->cols_m;
-    }
-
     T minor(size_t row, size_t col) {
-        if (!isSquare()) throw std::invalid_argument("Cofactor is only defined for square matrices");
-
         squareMatrix<T> sub = submatrix(row, col);
         return sub.determinant();
     }
@@ -50,7 +44,6 @@ public:
     }
 
     T determinant() {
-        if (!isSquare()) throw std::invalid_argument("Determinant is only defined for square matrices");
         if (this->rows_m == 1)
             return this->data_m[0];
 
