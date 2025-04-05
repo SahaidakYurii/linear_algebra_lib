@@ -1,4 +1,4 @@
-#include "ndmatrix.h"
+#include "tenzor.h"
 #include <cassert>
 #include <cmath>
 #include <iostream>

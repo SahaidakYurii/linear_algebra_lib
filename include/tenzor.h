@@ -12,7 +12,7 @@
 #include <cmath>
 
 template <typename T, size_t N>
-class ndmatrix {
+class tenzor<T, N> {
     std::vector<T> data_m;
     std::array<size_t, N> dims_m;
 
@@ -35,14 +35,14 @@ class ndmatrix {
     }
     size_t calculate_index(size_t iter) const {
         if (iter != N) {
-            throw std::invalid_argument("Number of arguments does not match dimentionality of the ndmatrix");
+            throw std::invalid_argument("Number of arguments does not match dimentionality of the tenzor");
         }
         return 0;
     }
 
 public:
     template <typename... Indices>
-    explicit ndmatrix(Indices ... indices) : data_m() {
+    explicit tenzor(Indices ... indices) : data_m() {
         static_assert(sizeof...(Indices) == N, "Number of indices must match the dimension N");
         static_assert((std::is_convertible_v<Indices, size_t> && ...), "All indices must be convertible to size_t");
 
@@ -51,12 +51,12 @@ public:
     }
 
     template <typename... Indices>
-    explicit ndmatrix(const std::vector<T>& data, Indices... indices)
-            : ndmatrix(indices...){
+    explicit tenzor(const std::vector<T>& data, Indices... indices)
+            : tenzor(indices...){
         data_m = data;
     }
 
-    ndmatrix<T, N>& reshape(std::initializer_list<size_t> new_dims) {
+    tenzor<T, N>& reshape(std::initializer_list<size_t> new_dims) {
         if (new_dims.size() != N) {
             throw std::invalid_argument("Dimension size does not match template parameter N.");
         }
@@ -83,7 +83,7 @@ public:
         return data_m;
     }
 
-    ndmatrix operator+= (const ndmatrix<T, N>& other) {
+    tenzor operator+= (const tenzor<T, N>& other) {
         if (this->dims_m != other.dims_m) {
             throw std::invalid_argument("Matrices must have the same dimensions");
         }
@@ -95,7 +95,7 @@ public:
         return *this;
     }
 
-    ndmatrix operator-= (const ndmatrix<T, N>& other) {
+    tenzor operator-= (const tenzor<T, N>& other) {
         if (this->dims_m != other.dims_m) {
             throw std::invalid_argument("Matrices must have the same dimensions");
         }
@@ -107,7 +107,7 @@ public:
         return *this;
     }
 
-    ndmatrix<T, N> multiply(const ndmatrix<T, N>& other) const {
+    tenzor<T, N> multiply(const tenzor<T, N>& other) const {
         auto lhs_shape = this->dims_m;
         auto rhs_shape = other.dims_m;
 
@@ -128,17 +128,17 @@ public:
             }
         }
 
-        return ndmatrix<T, N>(result_data, m, n);
+        return tenzor<T, N>(result_data, m, n);
     }
 
-    ndmatrix<T, N> invert() const {
+    tenzor<T, N> invert() const {
         if (dims_m[0] != dims_m[1]) {
             throw std::invalid_argument("Matrix must be square to invert.");
         }
 
         size_t n = dims_m[0];
-        ndmatrix<T, N> result{*this};
-        ndmatrix<T, N> identity{dims_m};
+        tenzor<T, N> result{*this};
+        tenzor<T, N> identity{dims_m};
 
         for (size_t i = 0; i < n; ++i) {
             identity(i, i) = 1;
@@ -191,7 +191,7 @@ public:
             throw std::invalid_argument("Vector size must match the number of rows in the matrix.");
         }
 
-        ndmatrix<T, N> inv = this->invert();
+        tenzor<T, N> inv = this->invert();
         std::vector<T> result(b.size(), 0);
 
         for (size_t i = 0; i < dims_m[0]; i++) {
@@ -219,16 +219,15 @@ public:
 };
 
 template <typename T, size_t N>
-ndmatrix<T, N> operator+ (const ndmatrix<T, N> &fst, const ndmatrix<T, N>& snd) {
-    ndmatrix<T, N> result(fst);
+tenzor<T, N> operator+ (const tenzor<T, N> &fst, const tenzor<T, N>& snd) {
+    tenzor<T, N> result(fst);
     return result += snd;
 }
 
 template <typename T, size_t N>
-ndmatrix<T, N> operator- (const ndmatrix<T, N> &fst, const ndmatrix<T, N>& snd) {
-    ndmatrix<T, N> result(fst);
+tenzor<T, N> operator- (const tenzor<T, N> &fst, const tenzor<T, N>& snd) {
+    tenzor<T, N> result(fst);
     return result -= snd;
 }
-
 
 #endif //LINALG_NDMATRIX_H

@@ -65,7 +65,7 @@ FetchContent_MakeAvailable(googletest)
 #! Project main executable source compilation
 add_executable(${PROJECT_NAME}
 		src/main.cpp
-		include/matrix.h include/ndmatrix.h)
+		include/matrix.h include/tenzor.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 

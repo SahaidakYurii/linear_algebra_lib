@@ -3,30 +3,20 @@
 
 #ifndef LINALG_MATRIX_H
 #define LINALG_MATRIX_H
-
-#include "ndmatrix.h"
+#include <algorithm>
 #include <vector>
 #include <sstream>
+#include "tenzor.h"
 
 template <typename T>
-class matrix : ndmatrix<T, 2> {
-    size_t rows_m{}, cols_m{};
+class matrix : tenzor<T, 2> {
+    size_t rows_m, cols_m;
     std::vector<T> data_m;
 
 public:
     matrix(const size_t rows, const size_t cols, std::vector<T> data = {})
-        : rows_m(rows), cols_m(cols), data_m(data) {
-        data_m.resize(rows_m * cols_m);
-    };
-    matrix() = default;
-    ~matrix() = default;
-
-    T& operator()(const size_t row, const size_t col) {
-        return data_m[row * cols_m + col];
-    }
-    const T& operator()(const size_t row, const size_t col) const {
-        return data_m[row * cols_m + col];
-    }
+        : tenzor<T, 2>(rows, cols, data),
+          rows_m(rows), cols_m(cols) {}
 
     void reshape(const size_t rows, const size_t cols) {
         if (rows == rows_m || cols == cols_m) {
