@@ -83,17 +83,28 @@ public:
         return data_m;
     }
 
-    ndmatrix<T, N> add(const ndmatrix<T, N>& other) const {
+    ndmatrix operator+= (const ndmatrix<T, N>& other) {
         if (this->dims_m != other.dims_m) {
-            throw std::invalid_argument("Matrices must have the same dimensions for addition.");
+            throw std::invalid_argument("Matrices must have the same dimensions");
         }
 
-        std::vector<T> result_data(this->data_m);
         for (size_t i = 0; i < total_size(); ++i) {
-            result_data[i] += other.data_m[i];
+            this->data_m[i] += other.data_m[i];
         }
 
-        return ndmatrix<T, N>(result_data, this->dims_m);
+        return *this;
+    }
+
+    ndmatrix operator-= (const ndmatrix<T, N>& other) {
+        if (this->dims_m != other.dims_m) {
+            throw std::invalid_argument("Matrices must have the same dimensions");
+        }
+
+        for (size_t i = 0; i < total_size(); ++i) {
+            this->data_m[i] -= other.data_m[i];
+        }
+
+        return *this;
     }
 
     ndmatrix<T, N> multiply(const ndmatrix<T, N>& other) const {
@@ -207,7 +218,17 @@ public:
     std::array<size_t, N> shape() const { return dims_m; }
 };
 
+template <typename T, size_t N>
+ndmatrix<T, N> operator+ (const ndmatrix<T, N> &fst, const ndmatrix<T, N>& snd) {
+    ndmatrix<T, N> result(fst);
+    return result += snd;
+}
 
+template <typename T, size_t N>
+ndmatrix<T, N> operator- (const ndmatrix<T, N> &fst, const ndmatrix<T, N>& snd) {
+    ndmatrix<T, N> result(fst);
+    return result -= snd;
+}
 
 
 #endif //LINALG_NDMATRIX_H

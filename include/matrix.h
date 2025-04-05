@@ -3,12 +3,13 @@
 
 #ifndef LINALG_MATRIX_H
 #define LINALG_MATRIX_H
-#include <algorithm>
+
+#include "ndmatrix.h"
 #include <vector>
 #include <sstream>
 
 template <typename T>
-class matrix {
+class matrix : ndmatrix<T, 2> {
     size_t rows_m{}, cols_m{};
     std::vector<T> data_m;
 
