@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
     //  Type---    --Num of dim        -------- size of each dimension
     //        |   |          ---------|
     //        V   V          V  V  V
-    ndmatrix<int, 2> m({2, 3, 4});
+    ndmatrix<int, 3> m{2, 3, 4};
 
     size_t i = 0;
     for (size_t r = 0; r < 2; r++) {

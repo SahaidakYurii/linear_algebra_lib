@@ -26,12 +26,12 @@ class ndmatrix {
 
     template <typename... Indices>
     size_t calculate_index(size_t iter, size_t idx, Indices... indices) const {
-        size_t multiplier = 1;
-        for (size_t i = 0; i < iter; ++i) {
-            multiplier *= dims_m[i];
+        size_t stride = 1;
+        for (size_t i = iter + 1; i < N; ++i) {
+            stride *= dims_m[i];
         }
-        iter++;
-        return idx * multiplier + calculate_index(iter, indices...);
+        return idx * stride + calculate_index(iter + 1, indices...);
+
     }
     size_t calculate_index(size_t iter) const {
         if (iter != N) {
@@ -40,25 +40,20 @@ class ndmatrix {
         return 0;
     }
 
-
-
 public:
+    template <typename... Indices>
+    explicit ndmatrix(Indices ... indices) : data_m() {
+        static_assert(sizeof...(Indices) == N, "Number of indices must match the dimension N");
+        static_assert((std::is_convertible_v<Indices, size_t> && ...), "All indices must be convertible to size_t");
 
-
-
-    ndmatrix(const std::array<size_t, N>& dims, const std::vector<T>& data = {})
-            : dims_m(dims), data_m(data) {
+        dims_m = { static_cast<size_t>(indices)... };
         data_m.resize(total_size());
     }
 
-    // Constructor that allows initialization from an initializer list
-    ndmatrix(std::initializer_list<size_t> dims_list, std::vector<T> data = {})
-            : data_m(data) {
-        if (dims_list.size() != N) {
-            throw std::invalid_argument("Initializer list size must match template parameter N.");
-        }
-        std::copy(dims_list.begin(), dims_list.end(), dims_m.begin());
-        data_m.resize(total_size());
+    template <typename... Indices>
+    explicit ndmatrix(const std::vector<T>& data, Indices... indices)
+            : ndmatrix(indices...){
+        data_m = data;
     }
 
     ndmatrix<T, N>& reshape(std::initializer_list<size_t> new_dims) {
@@ -98,7 +93,7 @@ public:
             result_data[i] += other.data_m[i];
         }
 
-        return ndmatrix<T, N>(this->dims_m, result_data);
+        return ndmatrix<T, N>(result_data, this->dims_m);
     }
 
     ndmatrix<T, N> multiply(const ndmatrix<T, N>& other) const {
@@ -122,7 +117,7 @@ public:
             }
         }
 
-        return ndmatrix<T, N>({m, n}, result_data);
+        return ndmatrix<T, N>(result_data, m, n);
     }
 
     ndmatrix<T, N> invert() const {
@@ -131,8 +126,8 @@ public:
         }
 
         size_t n = dims_m[0];
-        ndmatrix<T, N> result(*this);
-        ndmatrix<T, N> identity(dims_m);
+        ndmatrix<T, N> result{*this};
+        ndmatrix<T, N> identity{dims_m};
 
         for (size_t i = 0; i < n; ++i) {
             identity(i, i) = 1;
@@ -198,9 +193,9 @@ public:
     }
 
 
-
     template <typename... Indices>
     T& operator()(Indices... indices) {
+        static_assert(sizeof...(Indices) == N, "operator() requires exactly N indices.");
         return data_m[calculate_index(0, indices...)];
     }
 
@@ -208,8 +203,6 @@ public:
     const T& operator()(Indices... indices) const {
         return data_m[calculate_index(0, indices...)];
     }
-
-
 
     std::array<size_t, N> shape() const { return dims_m; }
 };
