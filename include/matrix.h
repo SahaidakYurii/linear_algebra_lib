@@ -46,6 +46,17 @@ public:
 
         return ss.str();
     }
+
+    matrix<T> transpose() {
+        matrix<T> temp(rows_m, cols_m);
+        for (size_t r = 0; r < rows_m; r++) {
+            for (size_t c = 0; c < cols_m; c++) {
+                temp(c, r) = this->operator()(r, c);
+            }
+        }
+
+        return temp;
+    }
 };
 
 

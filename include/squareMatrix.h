@@ -27,12 +27,34 @@ protected:
     }
 public:
     explicit squareMatrix(const size_t a, std::vector<T> data = {}):
-        matrix<T>(a, a, data), a(a) {}
+    matrix<T>(a, a, data), a(a) {}
 
     explicit squareMatrix(const matrix<T> &other) :
         matrix<T>(other.reshape(other.cols_m < other.rows_m ? other.cols_m : other.rows_m)),
         a(other.cols_m < other.rows_m ? other.cols_m : other.rows_m)
-            {}
+    {}
+
+    static squareMatrix<T> identity(size_t n) {
+        std::vector<T> identity_data(n * n, T{0});
+        for (size_t i = 0; i < n; ++i) {
+            identity_data[i * n + i] = T{1};
+        }
+        return squareMatrix<T>(n, identity_data);
+    }
+
+    bool isSingular() {
+        return determinant() == 0;
+    }
+
+    bool isSymmetrical() {
+        for (size_t r = 0; r < a; r++) {
+            for (size_t c = 0; c < a; c++) {
+                if (this->operator()(r, c) != this->operator()(c, r))
+                    return false;
+            }
+        }
+        return true;
+    }
 
     T minor(size_t row, size_t col) {
         squareMatrix<T> sub = submatrix(row, col);
