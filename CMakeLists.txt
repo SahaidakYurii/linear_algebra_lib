@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 #! Check every comment after the "#!"
 
 #! CHANGE YOUR PROJECT NAME
-#  It is used as your project's main executable name. 
+#  It is used as your project's main executable name.
 set(PROJECT_NAME linear_algebra_lib)
 project(${PROJECT_NAME} C CXX) # project(${PROJECT_NAME} C CXX ASM)
 
@@ -65,7 +65,9 @@ FetchContent_MakeAvailable(googletest)
 #! Project main executable source compilation
 add_executable(${PROJECT_NAME}
 		src/main.cpp
-		include/matrix.h include/tenzor.h)
+		include/matrix.h include/tenzor.h
+		include/squareMatrix.h
+)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
