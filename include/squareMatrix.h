@@ -218,6 +218,102 @@ public:
         return Qaccum;
     }
 
+    squareMatrix<T> inverse() {
+        T det = this->determinant();
+        if (std::abs(det) < 1e-12) {
+            throw std::runtime_error("Matrix is singular or nearly singular — cannot invert.");
+        }
+
+        std::vector<T> cofactors_data(this->rows_m * this->cols_m);
+
+        for (size_t r = 0; r < this->rows_m; r++) {
+            for (size_t c = 0; c < this->cols_m; c++) {
+                cofactors_data[r * this->cols_m + c] = this->cofactor(r, c);
+            }
+        }
+
+        squareMatrix<T> cofactorMat(this->rows_m, cofactors_data);
+
+        squareMatrix<T> adjugate(this->rows_m);
+        for (size_t i = 0; i < this->rows_m; ++i) {
+            for (size_t j = 0; j < this->cols_m; ++j) {
+                adjugate(i, j) = cofactorMat(j, i);
+            }
+        }
+
+        for (auto& val : adjugate.data_m) {
+            val /= det;
+        }
+
+        return adjugate;
+    }
+
+    std::pair<squareMatrix<T>, squareMatrix<T>> luDecompose() const {
+        if (this->a != this->rows_m || this->a != this->cols_m) {
+            throw std::runtime_error("LU decomposition only valid for square matrices");
+        }
+
+        squareMatrix<T> L(this->a);
+        squareMatrix<T> U(this->a);
+
+        for (size_t i = 0; i < this->a; i++) {
+            // Fill U
+            for (size_t j = i; j < this->a; j++) {
+                T sum = 0;
+                for (size_t k = 0; k < i; k++) {
+                    sum += L(i, k) * U(k, j);
+                }
+                U(i, j) = this->operator()(i, j) - sum;
+            }
+
+            // Fill L
+            for (size_t j = i; j < this->a; j++) {
+                if (i == j) {
+                    L(i, i) = 1;
+                } else {
+                    T sum = 0;
+                    for (size_t k = 0; k < i; k++) {
+                        sum += L(j, k) * U(k, i);
+                    }
+                    L(j, i) = (this->operator()(j, i) - sum) / U(i, i);
+                }
+            }
+        }
+
+        return std::make_pair(L, U);
+    }
+
+    std::vector<T> solve(const std::vector<T>& b) const {
+        if (b.size() != this->a) {
+            throw std::runtime_error("Size of b must match matrix dimensions.");
+        }
+
+        auto [L, U] = this->luDecompose();
+
+        std::vector<T> y(this->a);
+        for (size_t i = 0; i < this->a; ++i) {
+            T sum = 0;
+            for (size_t j = 0; j < i; ++j) {
+                sum += L(i, j) * y[j];
+            }
+            y[i] = b[i] - sum;
+        }
+
+        std::vector<T> x(this->a);
+        for (int i = static_cast<int>(this->a) - 1; i >= 0; --i) {
+            T sum = 0;
+            for (size_t j = i + 1; j < this->a; ++j) {
+                sum += U(i, j) * x[j];
+            }
+            x[i] = (y[i] - sum) / U(i, i);
+        }
+
+        return x;
+    }
+
+
+
+
 };
 
 #endif //SQUAREMATRIX_H
