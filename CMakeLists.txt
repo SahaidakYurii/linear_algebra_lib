@@ -69,6 +69,7 @@ add_executable(${PROJECT_NAME}
 		include/squareMatrix.h
 )
 
+
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 # Define the test executable

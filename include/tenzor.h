@@ -56,6 +56,7 @@ public:
             : tenzor(indices...){
         data_m = data;
         data_m.resize(total_size());
+
     }
 
     tenzor<T, N>& reshape(std::initializer_list<size_t> new_dims) {

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 
+
 // template<typename T, size_t N>
 // void print_matrix(const tenzor<T, N>& matrix) {
 //     auto shape = matrix.shape();
