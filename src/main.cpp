@@ -1,6 +1,7 @@
 #include <iostream>
 #include "matrix.h"
-#include "ndmatrix.h"
+#include "tenzor.h"
+#include "squareMatrix.h"
 
 
 int main(int argc, char* argv[]) {
@@ -14,7 +15,7 @@ int main(int argc, char* argv[]) {
     // A.reshape(6, 2);
     // std::cout << A.toString() << std::endl;
     //
-    // ndmatrix<char, 2> B{{2, 2}, {'a', 'b'}};
+    // tenzor<char, 2> B{{2, 2}, {'a', 'b'}};
     // for (size_t i = 0; i < B.shape()[0]; i++) {
     //     for (size_t j = 0; j < B.shape()[1]; j++) {
     //         std::cout << B(i, j) << " ";
@@ -24,7 +25,7 @@ int main(int argc, char* argv[]) {
     // std::cout << std::endl;
 
 
-    // ndmatrix<int, 3> С{4, 3, 3};
+    // tenzor<int, 3> С{4, 3, 3};
     //
     // size_t i = 0;
     // for (size_t r = 0; r < 4; r++) {
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]) {
     //  Type---    --Num of dim        -------- size of each dimension
     //        |   |          ---------|
     //        V   V          V  V  V
-    ndmatrix<int, 2> m({2, 3, 4});
+    tenzor<int, 3> m{2, 3, 4};
 
     size_t i = 0;
     for (size_t r = 0; r < 2; r++) {
@@ -83,4 +84,8 @@ int main(int argc, char* argv[]) {
         std::cout << "---------------------" << std::endl;
         std::cout << std::endl;
     }
+
+    squareMatrix<int> square{3, {1, 0, 0, 0, 1, 0, 0, 0, 1}};
+
+    std::cout << square.determinant() << std::endl;
 }
