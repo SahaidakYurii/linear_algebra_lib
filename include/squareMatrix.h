@@ -35,56 +35,11 @@ protected:
         return col;
     }
 
-    static void set_column(squareMatrix<T>& mat, size_t colIndex, const vector<T>& colData)
+    void set_column(squareMatrix<T>& mat, size_t colIndex, const vector<T>& colData)
     {
         for (size_t i = 0; i < mat.a; i++) {
-            mat.data_m[mat.a + i] = colData[i];
+            mat.data_m[mat.a + colIndex + i] = colData[i];
         }
-    }
-
-    std::pair<squareMatrix<T>, squareMatrix<T>> qrDecompose() const {
-        squareMatrix<T> Q(a);
-        squareMatrix<T> R(a);
-        for (size_t i = 0; i < a; i++) {
-            for (size_t j = 0; j < a; j++) {
-                Q(i, j) = (i == j) ? 1 : 0;
-               R(i, j) = 0;
-
-                // Q.data_m[i * a + j] = (i == j) ? 1 : 0;
-                // R.data_m[i * a + j] = 0;
-            }
-        }
-
-        for (size_t k = 0; k < a; k++) {
-            vector<T> col = get_column(*this, k);
-
-            for (size_t j = 0; j < k; j++) {
-                vector<T> qj = get_column(Q, j);
-                T dot = 0;
-                for (size_t idx = 0; idx < a; idx++) {
-                    dot += qj[idx] * col[idx];
-                }
-                R(j, k) = dot;
-                for (size_t idx = 0; idx < a; idx++) {
-                    col[idx] -= dot * qj[idx];
-                }
-            }
-
-            T norm_col = vectorNorm(col);
-            if (norm_col < 1e-15) {
-                R(k, k) = 0;
-                for (auto &val : col) val = 0;
-            } else {
-                R(k, k) = norm_col;
-                for (size_t idx = 0; idx < a; idx++) {
-                    col[idx] /= norm_col;
-                }
-            }
-
-            set_column(Q, k, col);
-        }
-
-        return std::make_pair(Q, R);
     }
 
     T offDiagonalNorm() const {
@@ -175,6 +130,49 @@ public:
         return res;
     }
 
+    std::pair<squareMatrix<T>, squareMatrix<T>> qrDecompose() const {
+        squareMatrix<T> Q(a);
+        squareMatrix<T> R(a);
+
+        for (size_t i = 0; i < a; i++) {
+            for (size_t j = 0; j < a; j++) {
+                Q(i, j) = 0;
+                R(i, j) = 0;
+            }
+        }
+
+        for (size_t k = 0; k < a; k++) {
+            std::vector<T> vk = get_column(*this, k);
+
+            for (size_t j = 0; j < k; j++) {
+                std::vector<T> qj = get_column(Q, j);
+                T rjk = 0;
+                for (size_t i = 0; i < a; i++) {
+                    rjk += qj[i] * vk[i];
+                }
+                R(j, k) = rjk;
+                for (size_t i = 0; i < a; i++) {
+                    vk[i] -= rjk * qj[i];
+                }
+            }
+
+            T norm = vectorNorm(vk);
+            if (norm < 1e-15) {
+                R(k, k) = 0;
+                for (size_t i = 0; i < a; i++) {
+                    Q(i, k) = 0;
+                }
+            } else {
+                R(k, k) = norm;
+                for (size_t i = 0; i < a; i++) {
+                    Q(i, k) = vk[i] / norm;
+                }
+            }
+        }
+
+        return {Q, R};
+    }
+
     vector<T> eigenvalues(double tol = 1e-9, int maxIter = 1000) const {
         squareMatrix<T> A(*this);
 
@@ -198,30 +196,80 @@ public:
         return eigvals;
     }
 
-    squareMatrix<T> eigenvectors(double tol = 1e-9, int maxIter = 1000) const {
+    std::vector<T> nullSpace(double tol) const {
+        squareMatrix<T> A = *this;
+        size_t n = this->a;
 
-        squareMatrix<T> A(*this);
-        squareMatrix<T> Qaccum(A.a);
-        for (size_t i = 0; i < A.a; i++) {
-            for (size_t j = 0; j < A.a; j++) {
-                Qaccum(i, j) = (i == j) ? 1 : 0;
+        for (size_t i = 0; i < n; ++i) {
+            size_t pivotRow = i;
+            for (size_t j = i + 1; j < n; ++j) {
+                if (std::abs(A(j, i)) > std::abs(A(pivotRow, i))) {
+                    pivotRow = j;
+                }
+            }
+
+            if (std::abs(A(pivotRow, i)) < tol) continue;
+
+            if (pivotRow != i) {
+                for (size_t k = 0; k < n; ++k) std::swap(A(i, k), A(pivotRow, k));
+            }
+
+            for (size_t j = i + 1; j < n; ++j) {
+                T factor = A(j, i) / A(i, i);
+                for (size_t k = i; k < n; ++k) {
+                    A(j, k) -= factor * A(i, k);
+                }
             }
         }
 
-        int iter = 0;
-        while (iter < maxIter) {
-            auto [Q, R] = A.qrDecompose();
-            tensor<T, 2> multiplied = R.multiply(Q);
-            A = squareMatrix<T>(A.a, multiplied.get_data());
-            tensor<T, 2> qaccumMult = Qaccum.multiply(Q);
-            Qaccum = squareMatrix<T>(A.a, qaccumMult.get_data());
-            if (A.offDiagonalNorm() < tol) {
-                break;
+        std::vector<T> x(n, 0);
+        x[n - 1] = 1;
+
+        for (int i = static_cast<int>(n) - 2; i >= 0; --i) {
+            T sum = 0;
+            for (size_t j = i + 1; j < n; ++j) {
+                sum += A(i, j) * x[j];
             }
-            iter++;
+            if (std::abs(A(i, i)) < tol) {
+                x[i] = 1;
+            } else {
+                x[i] = -sum / A(i, i);
+            }
         }
-        return Qaccum;
+
+        return x;
     }
+
+    squareMatrix<T> eigenvectorsViaNullspace(double tol = 1e-9) const {
+        std::vector<T> eigenvals = this->eigenvalues();
+        std::vector<std::vector<T>> vecs;
+
+        for (const T& lambda : eigenvals) {
+            squareMatrix<T> shifted = *this;
+            for (size_t i = 0; i < this->a; ++i) {
+                shifted(i, i) -= lambda;
+            }
+
+            std::vector<T> v = shifted.nullSpace(tol);
+
+            if (vectorNorm(v) > tol) {
+                for (auto& x : v) x /= vectorNorm(v);
+                vecs.push_back(v);
+            } else {
+                vecs.push_back(std::vector<T>(this->a, 0));
+            }
+        }
+
+        squareMatrix<T> result(this->a);
+        for (size_t col = 0; col < vecs.size(); ++col) {
+            for (size_t row = 0; row < this->a; ++row) {
+                result(row, col) = vecs[col][row];
+            }
+        }
+
+        return result;
+    }
+
 
     squareMatrix<T> inverse() {
         T det = this->determinant();
@@ -315,6 +363,40 @@ public:
 
         return x;
     }
+
+    std::vector<std::vector<T>> eigenvectorsViaSolving(std::vector<T> eigenvalues, double tol = 1e-9) const {
+        std::vector<std::vector<T>> eigenvectors;
+
+        for (T lambda : eigenvalues) {
+            // Form A - lambda * I
+            squareMatrix<T> shifted = *this;
+            for (size_t i = 0; i < this->a; ++i) {
+                shifted(i, i) -= lambda;
+            }
+
+            // We'll try to find x such that (A - λI)x = 0
+            // Let’s feed a random b and normalize the result
+            std::vector<T> b(this->a, 1.0); // or random vector, if you prefer
+            std::vector<T> x;
+
+            try {
+                x = shifted.solve(b);  // Will fail if matrix is singular
+            } catch (...) {
+                // Matrix likely singular => try alternate approach
+                x = std::vector<T>(this->a, 0);
+            }
+
+            // Normalize eigenvector
+            T norm = vectorNorm(x);
+            if (norm > tol) {
+                for (T& val : x) val /= norm;
+                eigenvectors.push_back(x);
+            }
+        }
+
+        return eigenvectors;
+    }
+
 
 
 
