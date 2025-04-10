@@ -10,6 +10,7 @@
 template <typename T>
 class squareMatrix : public matrix<T> {
     using matrix<T>::operator();
+
     size_t a;
 protected:
     squareMatrix<T> submatrix(size_t row, size_t col) {
@@ -27,18 +28,18 @@ protected:
         return squareMatrix<T>{a-1, sub_data};
     }
 
-    vector<T> get_column(const squareMatrix<T>& mat, size_t colIndex) const {
-        vector<T> col(mat.a);
-        for (size_t i = 0; i < mat.a; i++) {
-            col[i] = mat(i, colIndex);
+    vector<T> get_column(size_t colIndex) const {
+        vector<T> col(this->a);
+        for (size_t i = 0; i < this->a; i++) {
+            col[i] = (*this)(i, colIndex);
         }
         return col;
     }
 
-    void set_column(squareMatrix<T>& mat, size_t colIndex, const vector<T>& colData)
+    void set_column(size_t colIndex, const vector<T>& colData)
     {
-        for (size_t i = 0; i < mat.a; i++) {
-            mat.data_m[mat.a + colIndex + i] = colData[i];
+        for (size_t i = 0; i < this->a; i++) {
+            (*this)(i, colIndex) = colData[i];
         }
     }
 
@@ -142,10 +143,10 @@ public:
         }
 
         for (size_t k = 0; k < a; k++) {
-            std::vector<T> vk = get_column(*this, k);
+            std::vector<T> vk = this->get_column(k);
 
             for (size_t j = 0; j < k; j++) {
-                std::vector<T> qj = get_column(Q, j);
+                std::vector<T> qj = Q.get_column(j);
                 T rjk = 0;
                 for (size_t i = 0; i < a; i++) {
                     rjk += qj[i] * vk[i];
