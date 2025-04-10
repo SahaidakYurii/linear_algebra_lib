@@ -1,6 +1,5 @@
-//
-// Created by yurii-sahaidak on 4/5/25.
-//
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 #include "matrix.h"
 
@@ -12,7 +11,7 @@ class squareMatrix : public matrix<T> {
     size_t a;
 protected:
     squareMatrix<T> submatrix(size_t row, size_t col) {
-        std::vector<T> sub_data{};
+        vector<T> sub_data{};
         sub_data.reserve((this->rows_m - 1) * (this->cols_m - 1));
         for (size_t r = 0; r < this->rows_m; r++) {
             if (r == row) continue;
@@ -26,21 +25,15 @@ protected:
         return squareMatrix<T>{a-1, sub_data};
     }
 
-    T vectorNorm(const std::vector<T>& v) const {
-        T sum = 0;
-        for (auto &val : v) sum += val * val;
-        return std::sqrt(sum);
-    }
-
-    std::vector<T> get_column(const squareMatrix<T>& mat, size_t colIndex) const {
-        std::vector<T> col(mat.a);
+    vector<T> get_column(const squareMatrix<T>& mat, size_t colIndex) const {
+        vector<T> col(mat.a);
         for (size_t i = 0; i < mat.a; i++) {
             col[i] = mat(i, colIndex);
         }
         return col;
     }
 
-    static void set_column(squareMatrix<T>& mat, size_t colIndex, const std::vector<T>& colData)
+    static void set_column(squareMatrix<T>& mat, size_t colIndex, const vector<T>& colData)
     {
         for (size_t i = 0; i < mat.a; i++) {
             mat.data_m[mat.a + i] = colData[i];
@@ -61,10 +54,10 @@ protected:
         }
 
         for (size_t k = 0; k < a; k++) {
-            std::vector<T> col = get_column(*this, k);
+            vector<T> col = get_column(*this, k);
 
             for (size_t j = 0; j < k; j++) {
-                std::vector<T> qj = get_column(Q, j);
+                vector<T> qj = get_column(Q, j);
                 T dot = 0;
                 for (size_t idx = 0; idx < a; idx++) {
                     dot += qj[idx] * col[idx];
@@ -107,7 +100,7 @@ protected:
 
 
 public:
-    explicit squareMatrix(const size_t a, std::vector<T> data = {}):
+    explicit squareMatrix(const size_t a, vector<T> data = {}):
         matrix<T>(a, a, data), a(a) {}
 
     explicit squareMatrix(const matrix<T> &other)
@@ -119,11 +112,8 @@ public:
         }
     }
 
-
-
-
     static squareMatrix<T> identity(size_t n) {
-        std::vector<T> identity_data(n * n, T{0});
+        vector<T> identity_data(n * n, T{0});
         for (size_t i = 0; i < n; ++i) {
             identity_data[i * n + i] = T{1};
         }
@@ -183,14 +173,14 @@ public:
         return res;
     }
 
-    std::vector<T> eigenvalues(double tol = 1e-9, int maxIter = 1000) const {
+    vector<T> eigenvalues(double tol = 1e-9, int maxIter = 1000) const {
         squareMatrix<T> A(*this);
 
         int iter = 0;
         while (iter < maxIter) {
             auto [Q, R] = A.qrDecompose();
 
-            tenzor<T, 2> multiplied = R.multiply(Q);
+            tensor<T, 2> multiplied = R.multiply(Q);
             A = squareMatrix<T>(A.a, multiplied.get_data());
 
             if (A.offDiagonalNorm() < tol) {
@@ -199,7 +189,7 @@ public:
             iter++;
         }
 
-        std::vector<T> eigvals(A.a);
+        vector<T> eigvals(A.a);
         for (size_t i = 0; i < A.a; i++) {
             eigvals[i] = A(i, i);
         }
@@ -219,9 +209,9 @@ public:
         int iter = 0;
         while (iter < maxIter) {
             auto [Q, R] = A.qrDecompose();
-            tenzor<T, 2> multiplied = R.multiply(Q);
+            tensor<T, 2> multiplied = R.multiply(Q);
             A = squareMatrix<T>(A.a, multiplied.get_data());
-            tenzor<T, 2> qaccumMult = Qaccum.multiply(Q);
+            tensor<T, 2> qaccumMult = Qaccum.multiply(Q);
             Qaccum = squareMatrix<T>(A.a, qaccumMult.get_data());
             if (A.offDiagonalNorm() < tol) {
                 break;
@@ -237,7 +227,7 @@ public:
             throw std::runtime_error("Matrix is singular or nearly singular — cannot invert.");
         }
 
-        std::vector<T> cofactors_data(this->rows_m * this->cols_m);
+        vector<T> cofactors_data(this->rows_m * this->cols_m);
 
         for (size_t r = 0; r < this->rows_m; r++) {
             for (size_t c = 0; c < this->cols_m; c++) {
@@ -296,14 +286,14 @@ public:
         return std::make_pair(L, U);
     }
 
-    std::vector<T> solve(const std::vector<T>& b) const {
+    vector<T> solve(const vector<T>& b) const {
         if (b.size() != this->a) {
             throw std::runtime_error("Size of b must match matrix dimensions.");
         }
 
         auto [L, U] = this->luDecompose();
 
-        std::vector<T> y(this->a);
+        vector<T> y(this->a);
         for (size_t i = 0; i < this->a; ++i) {
             T sum = 0;
             for (size_t j = 0; j < i; ++j) {
@@ -312,7 +302,7 @@ public:
             y[i] = b[i] - sum;
         }
 
-        std::vector<T> x(this->a);
+        vector<T> x(this->a);
         for (int i = static_cast<int>(this->a) - 1; i >= 0; --i) {
             T sum = 0;
             for (size_t j = i + 1; j < this->a; ++j) {
@@ -323,10 +313,6 @@ public:
 
         return x;
     }
-
-
-
-
 };
 
 #endif //SQUAREMATRIX_H

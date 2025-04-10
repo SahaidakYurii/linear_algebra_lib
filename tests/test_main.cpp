@@ -1,12 +1,12 @@
-#include "tenzor.h"
-#include "squareMatrix.h"
+#include "linalg.h"
+
 #include <cassert>
 #include <cmath>
 #include <iostream>
 
 
  template<typename T, size_t N>
- void print_matrix(const tenzor<T, N>& matrix) {
+ void print_matrix(const tensor<T, N>& matrix) {
      auto shape = matrix.shape();
      size_t index = 0;
      for (size_t i = 0; i < shape[0]; ++i) {
@@ -18,7 +18,7 @@
  }
 
  template<typename T, size_t N>
- void assert_matrix_equal(const tenzor<T, N>& result, const tenzor<T, N>& expected, const std::string& test_name) {
+ void assert_matrix_equal(const tensor<T, N>& result, const tensor<T, N>& expected, const std::string& test_name) {
      if (result.shape() != expected.shape()) {
          std::cout << "FAIL [" << test_name << "]: Dimension mismatch." << std::endl;
          return;
@@ -36,18 +36,18 @@
 
 
  void test_addition() {
-     tenzor<int, 2> mat1({1, 2, 3, 4}, 2, 2);
-     tenzor<int, 2> mat2({5, 6, 7, 8}, 2, 2);
-     tenzor<int, 2> expected({6, 8, 10, 12}, 2, 2);
+     tensor<int, 2> mat1({1, 2, 3, 4}, 2, 2);
+     tensor<int, 2> mat2({5, 6, 7, 8}, 2, 2);
+     tensor<int, 2> expected({6, 8, 10, 12}, 2, 2);
 
      auto result = mat1 + mat2;
      assert_matrix_equal(result, expected, "Addition Test");
  }
 
  void test_multiplication() {
-     tenzor<int, 2> mat1({1, 2, 3, 4, 5, 6}, 2, 3);
-     tenzor<int, 2> mat2({1, 1, 1, 1, 1, 1}, 3, 2);
-     tenzor<int, 2> expected({6, 6, 15, 15}, 2, 2);
+     tensor<int, 2> mat1({1, 2, 3, 4, 5, 6}, 2, 3);
+     tensor<int, 2> mat2({1, 1, 1, 1, 1, 1}, 3, 2);
+     tensor<int, 2> expected({6, 6, 15, 15}, 2, 2);
 
      auto result = mat1.multiply(mat2);
      assert_matrix_equal(result, expected, "Multiplication Test");

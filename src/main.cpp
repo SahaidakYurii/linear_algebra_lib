@@ -1,8 +1,5 @@
 #include <iostream>
-#include "matrix.h"
-#include "tenzor.h"
-#include "squareMatrix.h"
-
+#include "linalg.h"
 
 int main(int argc, char* argv[]) {
     // matrix<char> A(4, 3);
@@ -15,7 +12,7 @@ int main(int argc, char* argv[]) {
     // A.reshape(6, 2);
     // std::cout << A.toString() << std::endl;
     //
-    // tenzor<char, 2> B{{2, 2}, {'a', 'b'}};
+    // tensor<char, 2> B{{2, 2}, {'a', 'b'}};
     // for (size_t i = 0; i < B.shape()[0]; i++) {
     //     for (size_t j = 0; j < B.shape()[1]; j++) {
     //         std::cout << B(i, j) << " ";
@@ -25,7 +22,7 @@ int main(int argc, char* argv[]) {
     // std::cout << std::endl;
 
 
-    // tenzor<int, 3> С{4, 3, 3};
+    // tensor<int, 3> С{4, 3, 3};
     //
     // size_t i = 0;
     // for (size_t r = 0; r < 4; r++) {
@@ -49,7 +46,7 @@ int main(int argc, char* argv[]) {
     //  Type---    --Num of dim        -------- size of each dimension
     //        |   |          ---------|
     //        V   V          V  V  V
-    tenzor<int, 3> m{2, 3, 4};
+    tensor<int, 3> m{2, 3, 4};
 
     size_t i = 0;
     for (size_t r = 0; r < 2; r++) {

@@ -3,19 +3,18 @@
 
 #ifndef LINALG_MATRIX_H
 #define LINALG_MATRIX_H
-#include <algorithm>
 #include <vector>
 #include <sstream>
-#include "tenzor.h"
+#include "tensor.h"
 
 template <typename T>
-class matrix : public tenzor<T, 2> {
+class matrix : public tensor<T, 2> {
 protected:
     size_t rows_m, cols_m;
 
 public:
-    matrix(const size_t rows, const size_t cols, std::vector<T> data = {})
-        : tenzor<T, 2>(data, rows, cols),
+    matrix(const size_t rows, const size_t cols, vector<T> data = {})
+        : tensor<T, 2>(data, rows, cols),
           rows_m(rows), cols_m(cols) {}
 
     void reshape(const size_t rows, const size_t cols) {
@@ -23,7 +22,7 @@ public:
             return;
         }
 
-        auto temp_data = std::vector<T>(rows * cols);
+        auto temp_data = vector<T>(rows * cols);
 
         // copies the common part, if 3x4 reshaped to 2x6, the 2x4 part will remain same
         for (size_t r = 0; r < (rows < rows_m ? rows : rows_m); r++) {
