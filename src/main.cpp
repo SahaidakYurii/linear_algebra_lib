@@ -84,5 +84,7 @@ int main(int argc, char* argv[]) {
 
     squareMatrix<int> square{3, {1, 0, 0, 0, 1, 0, 0, 0, 1}};
 
+    square.transpose();
+
     std::cout << square.determinant() << std::endl;
 }

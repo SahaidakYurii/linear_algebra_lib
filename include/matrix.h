@@ -3,7 +3,6 @@
 
 #ifndef LINALG_MATRIX_H
 #define LINALG_MATRIX_H
-#include <vector>
 #include <sstream>
 #include "tensor.h"
 
@@ -13,6 +12,8 @@ protected:
     size_t rows_m, cols_m;
 
 public:
+    using tensor<T, 2>::operator();
+
     matrix(const size_t rows, const size_t cols, vector<T> data = {})
         : tensor<T, 2>(data, rows, cols),
           rows_m(rows), cols_m(cols) {}
@@ -50,13 +51,12 @@ public:
         matrix<T> temp(rows_m, cols_m);
         for (size_t r = 0; r < rows_m; r++) {
             for (size_t c = 0; c < cols_m; c++) {
-                temp(c, r) = this->operator()(r, c);
+                temp(c, r) = (*this)(r, c);
             }
         }
 
         return temp;
     }
-
 };
 
 

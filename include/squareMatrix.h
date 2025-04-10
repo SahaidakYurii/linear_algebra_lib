@@ -1,5 +1,6 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+//
+// Created by yurii-sahaidak on 4/5/25.
+//
 
 #include "matrix.h"
 
@@ -8,6 +9,7 @@
 
 template <typename T>
 class squareMatrix : public matrix<T> {
+    using matrix<T>::operator();
     size_t a;
 protected:
     squareMatrix<T> submatrix(size_t row, size_t col) {
@@ -90,7 +92,7 @@ protected:
         for (size_t i = 0; i < a; i++) {
             for (size_t j = 0; j < a; j++) {
                 if (i != j) {
-                    T val = this->operator()(i,j);
+                    T val = (*this)(i,j);
                     sum += val * val;
                 }
             }
@@ -127,7 +129,7 @@ public:
     bool isSymmetrical() {
         for (size_t r = 0; r < a; r++) {
             for (size_t c = 0; c < a; c++) {
-                if (this->operator()(r, c) != this->operator()(c, r))
+                if ((*this)(r, c) != (*this)(c, r))
                     return false;
             }
         }
@@ -139,8 +141,8 @@ public:
             for (size_t c = 0; c < a; c++) {
                 if (r == c)
                     continue;
-                
-                if (this->operator()(r, c) != -this->operator()(c, r))
+
+                if ((*this)(r, c) != -(*this)(c, r))
                     return false;
             }
         }
@@ -166,7 +168,7 @@ public:
         T res = 0;
         for (size_t col = 0; col < this->cols_m; ++col) {
             T cof = cofactor(0, col);
-            T val = this->operator()(0, col);
+            T val = (*this)(0, col);
             res += val * cof;
         }
 
@@ -266,7 +268,7 @@ public:
                 for (size_t k = 0; k < i; k++) {
                     sum += L(i, k) * U(k, j);
                 }
-                U(i, j) = this->operator()(i, j) - sum;
+                U(i, j) = (*this)(i, j) - sum;
             }
 
             // Fill L
@@ -278,7 +280,7 @@ public:
                     for (size_t k = 0; k < i; k++) {
                         sum += L(j, k) * U(k, i);
                     }
-                    L(j, i) = (this->operator()(j, i) - sum) / U(i, i);
+                    L(j, i) = ((*this)(j, i) - sum) / U(i, i);
                 }
             }
         }
@@ -313,6 +315,10 @@ public:
 
         return x;
     }
+
+
+
+
 };
 
 #endif //SQUAREMATRIX_H
