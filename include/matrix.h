@@ -84,5 +84,4 @@ matrix<T>& operator*(matrix<T> fst, const matrix<T>& snd) {
     return fst;
 }
 
-
 #endif //LINALG_MATRIX_H

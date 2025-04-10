@@ -87,6 +87,15 @@ public:
         return data_m;
     }
 
+    bool operator==(const tensor<T, N>& other) const {
+        for (size_t i = 0; i < data_m.size(); ++i) {
+            if (data_m[i] != other.data_m[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     tensor operator+= (const tensor<T, N>& other) {
         if (this->dims_m != other.dims_m) {
             throw std::invalid_argument("Matrices must have the same dimensions");
