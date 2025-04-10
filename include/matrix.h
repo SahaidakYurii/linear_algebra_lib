@@ -81,7 +81,7 @@ public:
 };
 
 template <typename T>
-matrix<T>& operator+(matrix<T> fst, const matrix<T>& snd) {
+matrix<T>& operator*(matrix<T> fst, const matrix<T>& snd) {
     fst *= snd;
     return fst;
 }
