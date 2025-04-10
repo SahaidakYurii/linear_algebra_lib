@@ -12,8 +12,6 @@ protected:
     size_t rows_m, cols_m;
 
 public:
-    using tensor<T, 2>::operator();
-
     matrix(const size_t rows, const size_t cols, vector<T> data = {})
         : tensor<T, 2>(data, rows, cols),
           rows_m(rows), cols_m(cols) {}
@@ -68,11 +66,11 @@ public:
 
         for (size_t r = 0; r < rows; r++) {
             for (size_t c = 0; c < cols; c++) {
-                T temp{};
+                T sum{};
                 for (size_t i = 0; i < this->cols_m; i++) {
-                    temp += (*this)(r, i) * other(i, c);
+                    sum += (*this)(r, i) * other(i, c);
                 }
-                temp(r, c) = temp;
+                temp(r, c) = sum;
             }
         }
         *this = temp;
