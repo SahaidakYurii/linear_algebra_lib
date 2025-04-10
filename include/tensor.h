@@ -135,11 +135,6 @@ public:
         return tensor<T, N>(result_data, m, n);
     }
 
-
-
-
-
-
     template <typename... Indices>
     T& operator()(Indices... indices) {
         static_assert(sizeof...(Indices) == N, "operator() requires exactly N indices.");

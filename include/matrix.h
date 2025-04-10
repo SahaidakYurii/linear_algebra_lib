@@ -57,7 +57,34 @@ public:
 
         return temp;
     }
+
+    matrix<T>& operator*=(const matrix<T>& other) {
+        if (this->cols_m != other.rows_m) {
+            throw std::invalid_argument("Wrong dimensions of matrices");
+        }
+
+        size_t rows = this->rows_m, cols = other.cols_m;
+        matrix<T> temp(rows, cols);
+
+        for (size_t r = 0; r < rows; r++) {
+            for (size_t c = 0; c < cols; c++) {
+                T temp{};
+                for (size_t i = 0; i < this->cols_m; i++) {
+                    temp += (*this)(r, i) * other(i, c);
+                }
+                temp(r, c) = temp;
+            }
+        }
+        *this = temp;
+        return *this;
+    }
 };
+
+template <typename T>
+matrix<T>& operator+(matrix<T> fst, const matrix<T>& snd) {
+    fst *= snd;
+    return fst;
+}
 
 
 #endif //LINALG_MATRIX_H
