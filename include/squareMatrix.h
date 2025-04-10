@@ -56,6 +56,19 @@ public:
         return true;
     }
 
+    bool isSkewSymmetrical() {
+        for (size_t r = 0; r < a; r++) {
+            for (size_t c = 0; c < a; c++) {
+                if (r == c)
+                    continue;
+                
+                if (this->operator()(r, c) != -this->operator()(c, r))
+                    return false;
+            }
+        }
+        return true;
+    }
+
     T minor(size_t row, size_t col) {
         squareMatrix<T> sub = submatrix(row, col);
         return sub.determinant();
