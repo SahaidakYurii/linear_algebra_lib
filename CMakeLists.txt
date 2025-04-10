@@ -1,68 +1,32 @@
 cmake_minimum_required(VERSION 3.15)
 
-#! Check every comment after the "#!"
-
 #! CHANGE YOUR PROJECT NAME
-#  It is used as your project's main executable name.
 set(PROJECT_NAME linear_algebra_lib)
-project(${PROJECT_NAME} C CXX) # project(${PROJECT_NAME} C CXX ASM)
+project(${PROJECT_NAME} C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-##########################################################
-# User configurable options of the template
-##########################################################
-# Note: symbols like WARNINGS_AS_ERRORS in configuration are intentionally variables
-# and not CMake options --using options creates too many problems for students.
-
-#! It is a good practice to set "WARNINGS_AS_ERRORS" ON,
-#  but sometimes it creates too much trouble, so default is OFF.
-set(WARNINGS_AS_ERRORS OFF)
-
-#! Always use PVS Studio while developing.
-set(ENABLE_PVS_STUDIO OFF)
-
-#! Select appropriate sanitizers.
-#  Definitely enable sanitizers while developing.
-#  Disable it for the production builds and before submitting for grading.
-#  Only one of the Memory (MSAN), Address (ASAN), or Thread (TSan)
-#  sanitizers is applicable at the time -- the first defined.
-
-#! UndefinedBehaviorSanitizer (UBSan).
-#  Info: https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
-set(ENABLE_UBSan OFF)
-#! AddressSanitizer -- detects use after free or after scope exit,
-#  memory overflows and leaks.
-#  Info: https://github.com/google/sanitizers/wiki/AddressSanitizer
-set(ENABLE_ASAN OFF)
-#! ThreadSanitizer -- detects data races.
-#  Info: https://clang.llvm.org/docs/ThreadSanitizer.html
-set(ENABLE_TSan OFF)
-#! MemorySanitizer -- detects uninitialized memory reads
-#  Info: https://github.com/google/sanitizers/wiki/MemorySanitizer
-set(ENABLE_MSAN OFF)
-
-#! Be default -- build release version if not specified otherwise.
+# Default to Release build type
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
-endif ()
-
-# Warnings as errors should be imported here -- do not move this line
-#include(cmake/CompilerWarnings.cmake)
+endif()
 
 ##########################################################
-# Project files, packages, libraries and so on
+# Project files, libraries, and configurations
 ##########################################################
+
+# Add Eigen (header-only)
 include(FetchContent)
-
 FetchContent_Declare(
-		googletest
-		URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+		eigen
+		GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+		GIT_TAG 3.4.0
 )
-FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(eigen)
 
-
-#! Project main executable source compilation
+# --------------------------------------------
+# Main executable
+# --------------------------------------------
 add_executable(${PROJECT_NAME}
 		src/main.cpp
 		include/linalg.h
@@ -72,27 +36,47 @@ add_executable(${PROJECT_NAME}
 		include/vector.h
 )
 
-
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
-# Define the test executable
+# --------------------------------------------
+# Benchmark executable
+# --------------------------------------------
+add_executable(benchmark_runner
+		benchmarks/benchmark.cpp
+		include/linalg.h
+		include/matrix.h
+		include/tensor.h
+		include/vector.h
+)
+
+target_include_directories(benchmark_runner
+		PRIVATE include
+		PRIVATE ${eigen_SOURCE_DIR}
+)
+
+add_executable(eigenvalue_benchmark
+		benchmarks/eigenvalue_benchmark.cpp
+		include/squareMatrix.h
+		include/matrix.h
+		include/tensor.h
+		include/vector.h
+)
+
+target_include_directories(eigenvalue_benchmark PRIVATE include ${eigen_SOURCE_DIR})
+
+# --------------------------------------------
+# Test executable (NO GoogleTest used)
+# --------------------------------------------
 add_executable(tests
 		tests/test_main.cpp
 )
 
 target_include_directories(tests PRIVATE include)
-#target_link_libraries(tests gtest_main gtest)
 
-
-
-##########################################################
-# Fixed CMakeLists.txt part
-##########################################################
-
-
+# --------------------------------------------
+# Install targets
+# --------------------------------------------
 INSTALL(PROGRAMS
-		$<TARGET_FILE:${PROJECT_NAME}> # ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
+		$<TARGET_FILE:${PROJECT_NAME}>
+		$<TARGET_FILE:benchmark_runner>
 		DESTINATION bin)
-
-# Include CMake setup
-#include(cmake/main-config.cmake)

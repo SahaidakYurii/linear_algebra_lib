@@ -76,12 +76,21 @@ public:
         *this = temp;
         return *this;
     }
+
+
 };
 
 template <typename T>
-matrix<T>& operator*(matrix<T> fst, const matrix<T>& snd) {
+matrix<T> operator*(matrix<T> fst, const matrix<T>& snd) {
     fst *= snd;
     return fst;
+}
+
+template <typename T>
+matrix<T> operator+(const matrix<T>& lhs, const matrix<T>& rhs) {
+    matrix<T> result(lhs);
+    result += rhs;
+    return result;
 }
 
 #endif //LINALG_MATRIX_H

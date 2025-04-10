@@ -96,6 +96,10 @@ public:
         return true;
     }
 
+    vector<T>& get_data() {
+        return data_m;
+    }
+
     tensor operator+= (const tensor<T, N>& other) {
         if (this->dims_m != other.dims_m) {
             throw std::invalid_argument("Matrices must have the same dimensions");

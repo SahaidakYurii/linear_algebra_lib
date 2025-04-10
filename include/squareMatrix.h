@@ -5,6 +5,8 @@
 #ifndef SQUAREMATRIX_H
 #define SQUAREMATRIX_H
 
+#include <boost/iterator/iterator_facade.hpp>
+
 #include "matrix.h"
 
 template <typename T>
@@ -395,11 +397,12 @@ public:
 
         return eigenvectors;
     }
-
-
-
-
-
 };
+
+template <typename T>
+squareMatrix<T> operator+(matrix<T> lhs, const matrix<T>& rhs) {
+    lhs += rhs;
+    return lhs;
+}
 
 #endif //SQUAREMATRIX_H
