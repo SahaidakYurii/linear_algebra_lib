@@ -12,8 +12,6 @@ protected:
     size_t rows_m, cols_m;
 
 public:
-    using tensor<T, 2>::operator();
-
     matrix(const size_t rows, const size_t cols, vector<T> data = {})
         : tensor<T, 2>(data, rows, cols),
           rows_m(rows), cols_m(cols) {}

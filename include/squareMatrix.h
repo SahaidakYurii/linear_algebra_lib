@@ -2,15 +2,13 @@
 // Created by yurii-sahaidak on 4/5/25.
 //
 
-#include "matrix.h"
-
 #ifndef SQUAREMATRIX_H
 #define SQUAREMATRIX_H
 
+#include "matrix.h"
+
 template <typename T>
 class squareMatrix : public matrix<T> {
-    using matrix<T>::operator();
-
     size_t a;
 protected:
     squareMatrix<T> submatrix(size_t row, size_t col) {
