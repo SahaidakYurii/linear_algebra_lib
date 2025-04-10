@@ -10,6 +10,7 @@
 template <typename T>
 class squareMatrix : public matrix<T> {
     using matrix<T>::operator();
+
     size_t a;
 protected:
     squareMatrix<T> submatrix(size_t row, size_t col) {
@@ -27,64 +28,19 @@ protected:
         return squareMatrix<T>{a-1, sub_data};
     }
 
-    vector<T> get_column(const squareMatrix<T>& mat, size_t colIndex) const {
-        vector<T> col(mat.a);
-        for (size_t i = 0; i < mat.a; i++) {
-            col[i] = mat(i, colIndex);
+    vector<T> get_column(size_t colIndex) const {
+        vector<T> col(this->a);
+        for (size_t i = 0; i < this->a; i++) {
+            col[i] = (*this)(i, colIndex);
         }
         return col;
     }
 
-    static void set_column(squareMatrix<T>& mat, size_t colIndex, const vector<T>& colData)
+    void set_column(size_t colIndex, const vector<T>& colData)
     {
-        for (size_t i = 0; i < mat.a; i++) {
-            mat.data_m[mat.a + i] = colData[i];
+        for (size_t i = 0; i < this->a; i++) {
+            (*this)(i, colIndex) = colData[i];
         }
-    }
-
-    std::pair<squareMatrix<T>, squareMatrix<T>> qrDecompose() const {
-        squareMatrix<T> Q(a);
-        squareMatrix<T> R(a);
-        for (size_t i = 0; i < a; i++) {
-            for (size_t j = 0; j < a; j++) {
-                Q(i, j) = (i == j) ? 1 : 0;
-               R(i, j) = 0;
-
-                // Q.data_m[i * a + j] = (i == j) ? 1 : 0;
-                // R.data_m[i * a + j] = 0;
-            }
-        }
-
-        for (size_t k = 0; k < a; k++) {
-            vector<T> col = get_column(*this, k);
-
-            for (size_t j = 0; j < k; j++) {
-                vector<T> qj = get_column(Q, j);
-                T dot = 0;
-                for (size_t idx = 0; idx < a; idx++) {
-                    dot += qj[idx] * col[idx];
-                }
-                R(j, k) = dot;
-                for (size_t idx = 0; idx < a; idx++) {
-                    col[idx] -= dot * qj[idx];
-                }
-            }
-
-            T norm_col = vectorNorm(col);
-            if (norm_col < 1e-15) {
-                R(k, k) = 0;
-                for (auto &val : col) val = 0;
-            } else {
-                R(k, k) = norm_col;
-                for (size_t idx = 0; idx < a; idx++) {
-                    col[idx] /= norm_col;
-                }
-            }
-
-            set_column(Q, k, col);
-        }
-
-        return std::make_pair(Q, R);
     }
 
     T offDiagonalNorm() const {
@@ -173,6 +129,49 @@ public:
         }
 
         return res;
+    }
+
+    std::pair<squareMatrix<T>, squareMatrix<T>> qrDecompose() const {
+        squareMatrix<T> Q(a);
+        squareMatrix<T> R(a);
+
+        for (size_t i = 0; i < a; i++) {
+            for (size_t j = 0; j < a; j++) {
+                Q(i, j) = 0;
+                R(i, j) = 0;
+            }
+        }
+
+        for (size_t k = 0; k < a; k++) {
+            std::vector<T> vk = this->get_column(k);
+
+            for (size_t j = 0; j < k; j++) {
+                std::vector<T> qj = Q.get_column(j);
+                T rjk = 0;
+                for (size_t i = 0; i < a; i++) {
+                    rjk += qj[i] * vk[i];
+                }
+                R(j, k) = rjk;
+                for (size_t i = 0; i < a; i++) {
+                    vk[i] -= rjk * qj[i];
+                }
+            }
+
+            T norm = vectorNorm(vk);
+            if (norm < 1e-15) {
+                R(k, k) = 0;
+                for (size_t i = 0; i < a; i++) {
+                    Q(i, k) = 0;
+                }
+            } else {
+                R(k, k) = norm;
+                for (size_t i = 0; i < a; i++) {
+                    Q(i, k) = vk[i] / norm;
+                }
+            }
+        }
+
+        return {Q, R};
     }
 
     vector<T> eigenvalues(double tol = 1e-9, int maxIter = 1000) const {
