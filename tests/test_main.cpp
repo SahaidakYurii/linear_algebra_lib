@@ -77,9 +77,8 @@ void test_eigens()
         std::cout << val << "\n";
     }
 
-    auto evecs = M.eigenvectors();
-    std::cout << "Eigenvectors matrix (columns = eigenvectors):\n"
-              << evecs.toString() << std::endl;
+    auto evecs = M.eigenvectorsViaNullspace();
+     std::cout << "Eigenvectors (columns):\n" << evecs.toString() << "\n";
 }
 
 void test_inverse() {
