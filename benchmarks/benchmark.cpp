@@ -15,7 +15,7 @@ double benchmark(Func func, int repetitions = 10) {
         auto start = high_resolution_clock::now();
         func();
         auto end = high_resolution_clock::now();
-        total_time += duration<double, std::milli>(end - start).count(); // convert to milliseconds
+        total_time += duration<double, std::milli>(end - start).count();
     }
     return total_time / repetitions;
 }

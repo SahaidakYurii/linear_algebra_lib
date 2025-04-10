@@ -54,6 +54,16 @@ target_include_directories(benchmark_runner
 		PRIVATE ${eigen_SOURCE_DIR}
 )
 
+add_executable(eigenvalue_benchmark
+		benchmarks/eigenvalue_benchmark.cpp
+		include/squareMatrix.h
+		include/matrix.h
+		include/tensor.h
+		include/vector.h
+)
+
+target_include_directories(eigenvalue_benchmark PRIVATE include ${eigen_SOURCE_DIR})
+
 # --------------------------------------------
 # Test executable (NO GoogleTest used)
 # --------------------------------------------
