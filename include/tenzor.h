@@ -55,6 +55,8 @@ public:
     explicit tenzor(const std::vector<T>& data, Indices... indices)
             : tenzor(indices...){
         data_m = data;
+        data_m.resize(total_size());
+
     }
 
     tenzor<T, N>& reshape(std::initializer_list<size_t> new_dims) {
@@ -132,77 +134,9 @@ public:
         return tenzor<T, N>(result_data, m, n);
     }
 
-    tenzor<T, N> invert() const {
-        if (dims_m[0] != dims_m[1]) {
-            throw std::invalid_argument("Matrix must be square to invert.");
-        }
-
-        size_t n = dims_m[0];
-        tenzor<T, N> result{*this};
-        tenzor<T, N> identity{dims_m};
-
-        for (size_t i = 0; i < n; ++i) {
-            identity(i, i) = 1;
-        }
-
-        for (size_t i = 0; i < n; ++i) {
-            size_t maxRow = i;
-            for (size_t k = i + 1; k < n; ++k) {
-                if (std::fabs(result.data_m[k * n + i]) > std::fabs(result.data_m[maxRow * n + i])) {
-                    maxRow = k;
-                }
-            }
-
-            for (size_t k = 0; k < n; ++k) {
-                std::swap(result.data_m[maxRow * n + k], result.data_m[i * n + k]);
-                std::swap(identity.data_m[maxRow * n + k], identity.data_m[i * n + k]);
-            }
-
-            for (size_t k = i + 1; k < n; ++k) {
-                T c = -result.data_m[k * n + i] / result.data_m[i * n + i];
-                for (size_t j = i; j < n; ++j) {
-                    result.data_m[k * n + j] += c * result.data_m[i * n + j];
-                    identity.data_m[k * n + j] += c * identity.data_m[i * n + j];
-                }
-            }
-        }
-
-        for (int i = n - 1; i >= 0; --i) {
-            for (int k = i - 1; k >= 0; --k) {
-                T c = -result.data_m[k * n + i] / result.data_m[i * n + i];
-                for (size_t j = 0; j < n; ++j) {
-                    identity.data_m[k * n + j] += c * identity.data_m[i * n + j];
-                }
-            }
-            T c = 1 / result.data_m[i * n + i];
-            for (size_t j = 0; j < n; ++j) {
-                identity.data_m[i * n + j] *= c;
-            }
-        }
-
-        return identity;
-    }
 
 
-    std::vector<T> solve(const std::vector<T>& b) const {
-        if (dims_m[0] != dims_m[1]) {
-            throw std::invalid_argument("Matrix must be square to solve equations.");
-        }
-        if (b.size() != dims_m[0]) {
-            throw std::invalid_argument("Vector size must match the number of rows in the matrix.");
-        }
 
-        tenzor<T, N> inv = this->invert();
-        std::vector<T> result(b.size(), 0);
-
-        for (size_t i = 0; i < dims_m[0]; i++) {
-            for (size_t j = 0; j < dims_m[1]; j++) {
-                result[i] += inv(i, j) * b[j];
-            }
-        }
-
-        return result;
-    }
 
 
     template <typename... Indices>
