@@ -68,23 +68,31 @@ public:
 
         for (size_t r = 0; r < rows; r++) {
             for (size_t c = 0; c < cols; c++) {
-                T temp{};
+                T sum{};
                 for (size_t i = 0; i < this->cols_m; i++) {
-                    temp += (*this)(r, i) * other(i, c);
+                    sum += (*this)(r, i) * other(i, c);
                 }
-                temp(r, c) = temp;
+                temp(r, c) = sum;
             }
         }
         *this = temp;
         return *this;
     }
+
+
 };
 
 template <typename T>
-matrix<T>& operator*(matrix<T> fst, const matrix<T>& snd) {
+matrix<T> operator*(matrix<T> fst, const matrix<T>& snd) {
     fst *= snd;
     return fst;
 }
 
+template <typename T>
+matrix<T> operator+(const matrix<T>& lhs, const matrix<T>& rhs) {
+    matrix<T> result(lhs);
+    result += rhs;
+    return result;
+}
 
 #endif //LINALG_MATRIX_H
