@@ -18,8 +18,8 @@ namespace linalg {
             : tensor<T, 2>(data, rows, cols),
               rows_m(rows), cols_m(cols) {}
 
-        size_t rows() const { return rows_m; }
-        size_t cols() const { return cols_m; }
+        [[nodiscard]] size_t rows() const { return rows_m; }
+        [[nodiscard]] size_t cols() const { return cols_m; }
 
         void reshape(const size_t rows, const size_t cols) {
             if (rows == rows_m || cols == cols_m) {
