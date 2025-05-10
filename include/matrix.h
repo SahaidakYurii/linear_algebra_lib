@@ -4,6 +4,7 @@
 #ifndef LINALG_MATRIX_H
 #define LINALG_MATRIX_H
 #include <sstream>
+
 #include "tensor.h"
 
 namespace linalg {
@@ -16,6 +17,9 @@ namespace linalg {
         matrix(const size_t rows, const size_t cols, vector<T> data = {})
             : tensor<T, 2>(data, rows, cols),
               rows_m(rows), cols_m(cols) {}
+
+        size_t rows() const { return rows_m; }
+        size_t cols() const { return cols_m; }
 
         void reshape(const size_t rows, const size_t cols) {
             if (rows == rows_m || cols == cols_m) {
@@ -46,8 +50,8 @@ namespace linalg {
             return ss.str();
         }
 
-        matrix<T> transpose() {
-            matrix<T> temp(rows_m, cols_m);
+        matrix<T> transpose() const{
+            matrix<T> temp(cols_m, rows_m);
             for (size_t r = 0; r < rows_m; r++) {
                 for (size_t c = 0; c < cols_m; c++) {
                     temp(c, r) = (*this)(r, c);
@@ -78,8 +82,14 @@ namespace linalg {
             return *this;
         }
 
-        size_t rows() const { return rows_m; }
-        size_t cols() const { return cols_m; }
+        matrix<T>& operator*=(const T& scalar) {
+            for (size_t i = 0; i < this->data_m.size(); ++i) {
+                this->data_m[i] *= scalar;
+            }
+            return *this;
+        }
+
+        matrix<T> pinv() const;
     };
 
     template <typename T>
@@ -89,10 +99,32 @@ namespace linalg {
     }
 
     template <typename T>
+    matrix<T> operator*(matrix<T> fst, const T& snd) {
+        fst *= snd;
+        return fst;
+    }
+
+    template <typename T>
+    matrix<T> operator*(const T& fst, matrix<T> snd) {
+        snd *= fst;
+        return snd;
+    }
+
+    template <typename T>
     matrix<T> operator+(const matrix<T>& lhs, const matrix<T>& rhs) {
         matrix<T> result(lhs);
         result += rhs;
         return result;
     }
 } // namespace linalg
+
+#include "squareMatrix.h"
+namespace linalg{
+    template <typename T>
+    matrix<T> matrix<T>::pinv() const {
+        auto AtA = static_cast<squareMatrix<T>>(this->transpose() * (*this));
+        return AtA.inverse() * this->transpose();
+    }
+} // namespace linalg
+
 #endif //LINALG_MATRIX_H

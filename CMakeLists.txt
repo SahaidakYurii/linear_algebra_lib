@@ -28,6 +28,17 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(eigen)
 
 ##########################################################
+# Main executables
+##########################################################
+add_executable(main
+		src/main.cpp
+)
+target_link_libraries(main
+		PRIVATE ${PROJECT_NAME}
+)
+target_include_directories(main PRIVATE ${eigen_SOURCE_DIR})
+
+##########################################################
 # Benchmark executables
 ##########################################################
 

@@ -59,6 +59,45 @@ TEST(MatrixTests, SolveEquation) {
     }
 }
 
+TEST(MatrixTests, PseudoInverse) {
+    linalg::matrix<double> A(3, 2, {1, 2, 3, 4, 5, 6});
+    auto A_p = A.pinv();
+
+    // A * A.pinv() * A == A
+    auto AA_pA = A * A_p * A;
+    for (size_t r = 0; r < A.rows(); ++r) {
+        for (size_t c = 0; c < A.cols(); ++c) {
+            EXPECT_NEAR(A(r, c), AA_pA(r, c), 0.001);
+        }
+    }
+
+    // A.pinv() * A * A.pinv() == A.pinv()
+    auto A_pAA_p = A_p * A * A_p;
+    for (size_t r = 0; r < A.rows(); ++r) {
+        for (size_t c = 0; c < A.cols(); ++c) {
+            EXPECT_NEAR(A_p(r, c), A_pAA_p(r, c), 0.001);
+        }
+    }
+
+     // Check if A.pinv() * A is symmetrical
+     auto ApA = A_p * A;
+     ASSERT_EQ(ApA.rows(), ApA.cols()) << "A.pinv() * A is not square!";
+     for (size_t i = 0; i < ApA.rows(); ++i) {
+         for (size_t j = 0; j < ApA.cols(); ++j) {
+             EXPECT_NEAR(ApA(i, j), ApA(j, i), 0.1);
+         }
+     }
+
+     // Check if A * A.pinv() is symmetrical
+     auto AAp = A * A_p;
+     ASSERT_EQ(AAp.rows(), AAp.cols()) << "A * A.pinv() is not square!";
+     for (size_t i = 0; i < AAp.rows(); ++i) {
+         for (size_t j = 0; j < AAp.cols(); ++j) {
+             EXPECT_NEAR(AAp(i, j), AAp(j, i), 0.1);
+         }
+     }
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

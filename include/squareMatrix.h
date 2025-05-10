@@ -5,8 +5,6 @@
 #ifndef SQUAREMATRIX_H
 #define SQUAREMATRIX_H
 
-#include <boost/iterator/iterator_facade.hpp>
-
 #include "matrix.h"
 
 namespace linalg {
@@ -69,6 +67,39 @@ namespace linalg {
             if (other.rows_m != other.cols_m) {
                 throw std::runtime_error("Not a square matrix!");
             }
+        }
+
+        explicit squareMatrix(matrix<T>&& other)
+        : matrix<T>(std::move(other)), a(other.rows())
+        {
+            if (other.rows() != other.cols()) {
+                throw std::runtime_error("Not a square matrix!");
+            }
+        }
+
+        squareMatrix& operator=(const matrix<T>& other) {
+            if (other.rows() != other.cols()) {
+                throw std::runtime_error("Not a square matrix!");
+            }
+
+            if (this != &other) {
+                matrix<T>::operator=(other);
+                a = other.rows();
+            }
+            return *this;
+        }
+
+        squareMatrix& operator=(matrix<T>&& other) noexcept {
+            if (other.rows() != other.cols()) {
+                throw std::runtime_error("Not a square matrix!");
+            }
+
+            if (this != &other) {
+                matrix<T>::operator=(std::move(other));
+                a = other.rows();
+            }
+
+            return *this;
         }
 
         static squareMatrix<T> identity(size_t n) {
