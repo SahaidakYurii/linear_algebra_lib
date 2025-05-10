@@ -77,7 +77,8 @@ public:
         return *this;
     }
 
-
+    size_t rows() const { return rows_m; }
+    size_t cols() const { return cols_m; }
 };
 
 template <typename T>

@@ -1,22 +1,25 @@
 cmake_minimum_required(VERSION 3.15)
 
-#! CHANGE YOUR PROJECT NAME
 set(PROJECT_NAME linear_algebra_lib)
 project(${PROJECT_NAME} C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# Default to Release build type
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
 endif()
 
-##########################################################
-# Project files, libraries, and configurations
-##########################################################
-
-# Add Eigen (header-only)
 include(FetchContent)
+
+##########################################################
+# Header-only library target
+##########################################################
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(${PROJECT_NAME} INTERFACE include)
+
+##########################################################
+# Dependencies: Eigen (header-only)
+##########################################################
 FetchContent_Declare(
 		eigen
 		GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
@@ -24,59 +27,53 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(eigen)
 
-# --------------------------------------------
-# Main executable
-# --------------------------------------------
-add_executable(${PROJECT_NAME}
-		src/main.cpp
-		include/linalg.h
-		include/matrix.h
-		include/tensor.h
-		include/squareMatrix.h
-		include/vector.h
-)
+##########################################################
+# Benchmark executables
+##########################################################
 
-target_include_directories(${PROJECT_NAME} PRIVATE include)
-
-# --------------------------------------------
-# Benchmark executable
-# --------------------------------------------
 add_executable(benchmark_runner
 		benchmarks/benchmark.cpp
-		include/linalg.h
-		include/matrix.h
-		include/tensor.h
-		include/vector.h
 )
-
-target_include_directories(benchmark_runner
-		PRIVATE include
-		PRIVATE ${eigen_SOURCE_DIR}
+target_link_libraries(benchmark_runner
+		PRIVATE ${PROJECT_NAME}
 )
+target_include_directories(benchmark_runner PRIVATE ${eigen_SOURCE_DIR})
 
 add_executable(eigenvalue_benchmark
 		benchmarks/eigenvalue_benchmark.cpp
-		include/squareMatrix.h
-		include/matrix.h
-		include/tensor.h
-		include/vector.h
 )
+target_link_libraries(eigenvalue_benchmark
+		PRIVATE ${PROJECT_NAME}
+)
+target_include_directories(eigenvalue_benchmark PRIVATE ${eigen_SOURCE_DIR})
 
-target_include_directories(eigenvalue_benchmark PRIVATE include ${eigen_SOURCE_DIR})
+##########################################################
+# GoogleTest: Unit test executable
+##########################################################
 
-# --------------------------------------------
-# Test executable (NO GoogleTest used)
-# --------------------------------------------
+FetchContent_Declare(
+		gtest
+		GIT_REPOSITORY https://github.com/google/googletest.git
+		GIT_TAG release-1.12.1
+)
+FetchContent_MakeAvailable(gtest)
+
+enable_testing()
+
 add_executable(tests
-		tests/test_main.cpp
+		tests/test.cpp
 )
 
-target_include_directories(tests PRIVATE include)
+target_link_libraries(tests
+		PRIVATE
+		${PROJECT_NAME}
+		gtest
+		gtest_main
+)
 
-# --------------------------------------------
-# Install targets
-# --------------------------------------------
-INSTALL(PROGRAMS
-		$<TARGET_FILE:${PROJECT_NAME}>
-		$<TARGET_FILE:benchmark_runner>
-		DESTINATION bin)
+add_test(NAME unit_tests COMMAND tests)
+
+##########################################################
+# Optional: Install targets
+##########################################################
+install(TARGETS benchmark_runner eigenvalue_benchmark tests DESTINATION bin)
