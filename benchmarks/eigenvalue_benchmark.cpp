@@ -1,7 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <fstream>
-#include <vector>
+#include "linalg.h"
 #include <cmath>
 #include <random>
 #include <Eigen/Dense>
@@ -23,8 +23,8 @@ double benchmark(Func func, int repetitions = 10) {
 }
 
 // Generate symmetric matrix of size n x n
-squareMatrix<double> generate_symmetric_matrix(size_t n) {
-    std::vector<double> data(n * n, 0);
+linalg::squareMatrix<double> generate_symmetric_matrix(size_t n) {
+    linalg::vector<double> data(n * n, 0);
     std::mt19937 gen(random_device{}());
     std::uniform_real_distribution<> dis(-10.0, 10.0);
 
@@ -36,7 +36,7 @@ squareMatrix<double> generate_symmetric_matrix(size_t n) {
         }
     }
 
-    return squareMatrix<double>(n, data);
+    return linalg::squareMatrix<double>(n, data);
 }
 
 void run_benchmark(const std::string& output_csv, int min_size = 5, int max_size = 75, int step = 5, int repetitions = 10) {
@@ -50,7 +50,7 @@ void run_benchmark(const std::string& output_csv, int min_size = 5, int max_size
         double total_eigen_time = 0;
 
         for (int rep = 0; rep < repetitions; ++rep) {
-            squareMatrix<double> my_mat = generate_symmetric_matrix(size);
+            linalg::squareMatrix<double> my_mat = generate_symmetric_matrix(size);
 
             // Copy to Eigen
             Eigen::MatrixXd eigen_mat(size, size);

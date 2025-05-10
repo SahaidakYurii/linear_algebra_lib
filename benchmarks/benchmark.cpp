@@ -21,7 +21,7 @@ double benchmark(Func func, int repetitions = 10) {
 }
 
 void run_addition_benchmark(std::ofstream& file, int size, int repetitions) {
-    matrix<float> my_a(size, size), my_b(size, size);
+    linalg::matrix<float> my_a(size, size), my_b(size, size);
     for (size_t i = 0; i < my_a.get_total_size(); ++i) {
         my_a.get_data()[i] = 1.0f;
         my_b.get_data()[i] = 2.0f;
@@ -31,7 +31,7 @@ void run_addition_benchmark(std::ofstream& file, int size, int repetitions) {
     Eigen::MatrixXf eigen_b = Eigen::MatrixXf::Constant(size, size, 2.0f);
 
     double mylib_time = benchmark([&]() {
-        matrix<float> c(my_a);
+        linalg::matrix<float> c(my_a);
         c += my_b;
     }, repetitions);
 
@@ -43,7 +43,7 @@ void run_addition_benchmark(std::ofstream& file, int size, int repetitions) {
 }
 
 void run_multiplication_benchmark(std::ofstream& file, int size, int repetitions) {
-    matrix<float> my_a(size, size), my_b(size, size);
+    linalg::matrix<float> my_a(size, size), my_b(size, size);
     for (size_t i = 0; i < my_a.get_total_size(); ++i) {
         my_a.get_data()[i] = 1.0f;
         my_b.get_data()[i] = 1.0f;
@@ -53,7 +53,7 @@ void run_multiplication_benchmark(std::ofstream& file, int size, int repetitions
     Eigen::MatrixXf eigen_b = Eigen::MatrixXf::Constant(size, size, 1.0f);
 
     double mylib_time = benchmark([&]() {
-        matrix<float> c = my_a * my_b;
+        linalg::matrix<float> c = my_a * my_b;
     }, repetitions);
 
     double eigen_time = benchmark([&]() {

@@ -61,7 +61,9 @@ FetchContent_MakeAvailable(gtest)
 enable_testing()
 
 add_executable(tests
-		tests/test.cpp
+		tests/test_matrix.cpp
+		tests/test_tenzor.cpp
+		tests/test_vector.cpp
 )
 
 target_link_libraries(tests

@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     //  Type---    --Num of dim        -------- size of each dimension
     //        |   |          ---------|
     //        V   V          V  V  V
-    tensor<int, 3> m{2, 3, 4};
+    linalg::tensor<int, 3> m{2, 3, 4};
 
     size_t i = 0;
     for (size_t r = 0; r < 2; r++) {
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
     }
 
-    squareMatrix<int> square{3, {1, 0, 0, 0, 1, 0, 0, 0, 1}};
+    linalg::squareMatrix<int> square{3, {1, 0, 0, 0, 1, 0, 0, 0, 1}};
 
     square.transpose();
 
