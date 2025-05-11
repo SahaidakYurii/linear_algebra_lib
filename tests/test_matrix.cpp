@@ -79,23 +79,69 @@ TEST(MatrixTests, PseudoInverse) {
         }
     }
 
-     // Check if A.pinv() * A is symmetrical
-     auto ApA = A_p * A;
-     ASSERT_EQ(ApA.rows(), ApA.cols()) << "A.pinv() * A is not square!";
-     for (size_t i = 0; i < ApA.rows(); ++i) {
-         for (size_t j = 0; j < ApA.cols(); ++j) {
-             EXPECT_NEAR(ApA(i, j), ApA(j, i), 0.1);
-         }
-     }
+    // Check if A.pinv() * A is symmetrical
+    auto ApA = A_p * A;
+    ASSERT_EQ(ApA.rows(), ApA.cols()) << "A.pinv() * A is not square!";
+    for (size_t i = 0; i < ApA.rows(); ++i) {
+        for (size_t j = 0; j < ApA.cols(); ++j) {
+            EXPECT_NEAR(ApA(i, j), ApA(j, i), 0.1);
+        }
+    }
 
-     // Check if A * A.pinv() is symmetrical
-     auto AAp = A * A_p;
-     ASSERT_EQ(AAp.rows(), AAp.cols()) << "A * A.pinv() is not square!";
-     for (size_t i = 0; i < AAp.rows(); ++i) {
-         for (size_t j = 0; j < AAp.cols(); ++j) {
-             EXPECT_NEAR(AAp(i, j), AAp(j, i), 0.1);
-         }
-     }
+    auto AAp = A * A_p;
+    ASSERT_EQ(AAp.rows(), AAp.cols()) << "A * A.pinv() is not square!";
+    for (size_t i = 0; i < AAp.rows(); ++i) {
+        for (size_t j = 0; j < AAp.cols(); ++j) {
+            EXPECT_NEAR(AAp(i, j), AAp(j, i), 0.1);
+        }
+    }
+}
+
+TEST(MatrixTests, RankCalculation) {
+    using linalg::matrix;
+
+    matrix<double> A(3, 3, {
+        1, 2, 3,
+        0, 1, 4,
+        0, 0, 5
+    });
+    EXPECT_EQ(A.rank(), 3);
+
+    matrix<double> B(3, 3, {
+        1, 2, 3,
+        2, 4, 6,
+        3, 6, 9
+    });
+    EXPECT_EQ(B.rank(), 1);
+
+    matrix<double> C(3, 3, {
+        1, 2, 3,
+        4, 5, 6,
+        0, 0, 0
+    });
+    EXPECT_EQ(C.rank(), 2);
+
+    matrix<double> D(4, 4, {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    });
+    EXPECT_EQ(D.rank(), 4);
+
+    matrix<double> E(4, 2, {
+        1, 0,
+        0, 1,
+        1, 1,
+        2, 1
+    });
+    EXPECT_EQ(E.rank(), 2);
+
+    matrix<double> F(2, 4, {
+        1, 2, 3, 4,
+        2, 4, 6, 8
+    });
+    EXPECT_EQ(F.rank(), 1);
 }
 
 int main(int argc, char **argv) {
