@@ -2,6 +2,64 @@
 #include "linalg.h"
 #include <cmath>
 
+
+TEST(MatrixConstructorTest, ColumnVectorInitialization) {
+    linalg::vector<linalg::vector<int>> data = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+
+    linalg::matrix<int> m(data);
+
+    EXPECT_EQ(m.cols(), 3);
+    EXPECT_EQ(m.rows(), 3);
+
+    EXPECT_EQ(m(0, 0), 1);
+    EXPECT_EQ(m(0, 1), 2);
+    EXPECT_EQ(m(0, 2), 3);
+    EXPECT_EQ(m(1, 0), 4);
+    EXPECT_EQ(m(1, 1), 5);
+    EXPECT_EQ(m(1, 2), 6);
+    EXPECT_EQ(m(2, 0), 7);
+    EXPECT_EQ(m(2, 1), 8);
+    EXPECT_EQ(m(2, 2), 9);
+}
+
+TEST(MatrixConstructorTest, HandlesEmptyColumnVector) {
+    linalg::vector<linalg::vector<int>> empty_data;
+    linalg::matrix<int> m(empty_data);
+
+    EXPECT_EQ(m.cols(), 0);
+    EXPECT_EQ(m.rows(), 0);
+}
+
+TEST(MatrixConstructorTest, PadsShortRows) {
+    linalg::vector<linalg::vector<int>> jagged = {
+        {1, 2},
+        {3},
+        {4, 5, 6}
+    };
+
+    linalg::matrix<int> m(jagged);
+
+    EXPECT_EQ(m.cols(), 3);
+    EXPECT_EQ(m.rows(), 3);
+
+    EXPECT_EQ(m(0, 0), 1);
+    EXPECT_EQ(m(0, 1), 2);
+    EXPECT_EQ(m(0, 2), {});
+
+    EXPECT_EQ(m(1, 0), 3);
+    EXPECT_EQ(m(1, 1), {});
+    EXPECT_EQ(m(1, 2), {});
+
+    EXPECT_EQ(m(2, 0), 4);
+    EXPECT_EQ(m(2, 1), 5);
+    EXPECT_EQ(m(2, 2), 6);
+}
+
+
 TEST(MatrixTests, EigenvaluesAndVectors) {
     linalg::vector<double> data = {
         5, 10, -5,
@@ -103,6 +161,47 @@ TEST(MatrixTests, RankCalculation) {
         2, 4, 6, 8
     });
     EXPECT_EQ(F.rank(), 1);
+}
+
+TEST(MatrixTests, BasisCalculation) {
+    using namespace linalg;
+
+    matrix<double> A(3, 3, {
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+    });
+
+    auto basis_A = A.basis();
+    EXPECT_EQ(basis_A.size(), 3);
+
+    matrix<double> B(3, 3, {
+        1, 2, 3,
+        0, 1, 1,
+        0, 0, 0
+    });
+
+    auto basis_B = B.basis();
+    EXPECT_EQ(basis_B.size(), 2);
+
+    matrix<double> C(4, 2, {
+        1, 2,
+        3, 4,
+        5, 6,
+        7, 8
+    });
+
+    auto basis_C = C.basis();
+    EXPECT_EQ(basis_C.size(), 2);
+
+    matrix<double> Z(3, 3, {
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0
+    });
+
+    auto basis_Z = Z.basis();
+    EXPECT_EQ(basis_Z.size(), 0);
 }
 
 int main(int argc, char **argv) {

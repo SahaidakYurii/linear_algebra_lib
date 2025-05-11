@@ -286,6 +286,11 @@ namespace linalg {
             }
         }
 
+        void concat(const vector<T>& v2) {
+            reserve(this->size() + v2.size());
+            std::copy(v2.begin(), v2.end(), std::back_inserter(*this));
+        }
+
         void pop_back() {
             if (is_empty()) throw std::out_of_range("pop_back");
             data_[--size_ - 1].~T();
