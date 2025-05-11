@@ -72,9 +72,10 @@ FetchContent_MakeAvailable(gtest)
 enable_testing()
 
 add_executable(tests
-		tests/test_matrix.cpp
-		tests/test_tenzor.cpp
 		tests/test_vector.cpp
+		tests/test_tenzor.cpp
+		tests/test_matrix.cpp
+		tests/test_squareMatrix.cpp
 )
 
 target_link_libraries(tests
