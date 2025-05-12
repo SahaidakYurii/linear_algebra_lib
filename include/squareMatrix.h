@@ -273,6 +273,8 @@ namespace linalg {
             return x;
         }
 
+
+
         squareMatrix<T> eigenvectorsViaNullspace(double tol = 1e-9) const {
             vector<T> eigenvals = this->eigenvalues();
             vector<vector<T>> vecs;
@@ -333,6 +335,46 @@ namespace linalg {
 
             return adjugate;
         }
+
+        std::tuple<squareMatrix<T>,squareMatrix<T>,squareMatrix<T>>
+        svd(double tol=1e-9) const {
+            // form B = AᵀA
+            auto At  = this->transpose();
+            auto Bt  = At.multiply(*this);
+            squareMatrix<T> B(a, Bt.get_data());
+
+            // eigendecomp B -> V, λ
+            auto lambdas = B.eigenvalues(tol);
+            auto V       = B.eigenvectorsViaNullspace(tol);
+
+            // Σ
+            squareMatrix<T> S(a);
+            for (size_t i=0;i<a;++i)
+                S(i,i)=std::sqrt(std::max<T>(lambdas[i],T{0}));
+
+            // U
+            squareMatrix<T> U(a);
+            for (size_t i=0;i<a;++i) {
+                T sigma=S(i,i);
+                if (sigma>tol) {
+                    auto vi = V.get_column(i);
+                    vector<T> Avi(a);
+                    for (size_t r=0;r<a;++r) {
+                        T sum=0;
+                        for (size_t c=0;c<a;++c) sum += (*this)(r,c)*vi[c];
+                        Avi[r]=sum;
+                    }
+                    for (size_t r=0;r<a;++r)
+                        U(r,i)=Avi[r]/sigma;
+                }
+            }
+            auto M = V.transpose();                // M is a matrix<T>
+            squareMatrix<T> VT{ std::move(M) };
+            return std::tuple< squareMatrix<T>,
+                    squareMatrix<T>,
+                    squareMatrix<T> >{ U, S, VT };
+        }
+
 
         std::pair<squareMatrix<T>, squareMatrix<T>> luDecompose() const {
             if (this->a != this->rows_m || this->a != this->cols_m) {
@@ -429,7 +471,11 @@ namespace linalg {
 
             return eigenvectors;
         }
+
+
     };
+
+
 
     template <typename T>
     squareMatrix<T> operator+(matrix<T> lhs, const matrix<T>& rhs) {
