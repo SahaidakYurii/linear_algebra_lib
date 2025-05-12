@@ -1,94 +1,93 @@
 cmake_minimum_required(VERSION 3.15)
 
-#! Check every comment after the "#!"
-
-#! CHANGE YOUR PROJECT NAME
-#  It is used as your project's main executable name.
 set(PROJECT_NAME linear_algebra_lib)
-project(${PROJECT_NAME} C CXX) # project(${PROJECT_NAME} C CXX ASM)
+project(${PROJECT_NAME} C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-##########################################################
-# User configurable options of the template
-##########################################################
-# Note: symbols like WARNINGS_AS_ERRORS in configuration are intentionally variables
-# and not CMake options --using options creates too many problems for students.
-
-#! It is a good practice to set "WARNINGS_AS_ERRORS" ON,
-#  but sometimes it creates too much trouble, so default is OFF.
-set(WARNINGS_AS_ERRORS OFF)
-
-#! Always use PVS Studio while developing.
-set(ENABLE_PVS_STUDIO OFF)
-
-#! Select appropriate sanitizers.
-#  Definitely enable sanitizers while developing.
-#  Disable it for the production builds and before submitting for grading.
-#  Only one of the Memory (MSAN), Address (ASAN), or Thread (TSan)
-#  sanitizers is applicable at the time -- the first defined.
-
-#! UndefinedBehaviorSanitizer (UBSan).
-#  Info: https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
-set(ENABLE_UBSan OFF)
-#! AddressSanitizer -- detects use after free or after scope exit,
-#  memory overflows and leaks.
-#  Info: https://github.com/google/sanitizers/wiki/AddressSanitizer
-set(ENABLE_ASAN OFF)
-#! ThreadSanitizer -- detects data races.
-#  Info: https://clang.llvm.org/docs/ThreadSanitizer.html
-set(ENABLE_TSan OFF)
-#! MemorySanitizer -- detects uninitialized memory reads
-#  Info: https://github.com/google/sanitizers/wiki/MemorySanitizer
-set(ENABLE_MSAN OFF)
-
-#! Be default -- build release version if not specified otherwise.
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
-endif ()
+endif()
 
-# Warnings as errors should be imported here -- do not move this line
-#include(cmake/CompilerWarnings.cmake)
-
-##########################################################
-# Project files, packages, libraries and so on
-##########################################################
 include(FetchContent)
 
+##########################################################
+# Header-only library target
+##########################################################
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(${PROJECT_NAME} INTERFACE include)
+
+##########################################################
+# Dependencies: Eigen (header-only)
+##########################################################
 FetchContent_Declare(
-		googletest
-		URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+		eigen
+		GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+		GIT_TAG 3.4.0
 )
-FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(eigen)
 
-
-#! Project main executable source compilation
-add_executable(${PROJECT_NAME}
+##########################################################
+# Main executables
+##########################################################
+add_executable(main
 		src/main.cpp
-		include/matrix.h include/tenzor.h
-		include/squareMatrix.h
 )
+target_link_libraries(main
+		PRIVATE ${PROJECT_NAME}
+)
+target_include_directories(main PRIVATE ${eigen_SOURCE_DIR})
 
-target_include_directories(${PROJECT_NAME} PRIVATE include)
+##########################################################
+# Benchmark executables
+##########################################################
 
-# Define the test executable
+add_executable(benchmark_runner
+		benchmarks/benchmark.cpp
+)
+target_link_libraries(benchmark_runner
+		PRIVATE ${PROJECT_NAME}
+)
+target_include_directories(benchmark_runner PRIVATE ${eigen_SOURCE_DIR})
+
+add_executable(eigenvalue_benchmark
+		benchmarks/eigenvalue_benchmark.cpp
+)
+target_link_libraries(eigenvalue_benchmark
+		PRIVATE ${PROJECT_NAME}
+)
+target_include_directories(eigenvalue_benchmark PRIVATE ${eigen_SOURCE_DIR})
+
+##########################################################
+# GoogleTest: Unit test executable
+##########################################################
+
+FetchContent_Declare(
+		gtest
+		GIT_REPOSITORY https://github.com/google/googletest.git
+		GIT_TAG release-1.12.1
+)
+FetchContent_MakeAvailable(gtest)
+
+enable_testing()
+
 add_executable(tests
-		tests/test_main.cpp
+		tests/test_vector.cpp
+		tests/test_tenzor.cpp
+		tests/test_matrix.cpp
+		tests/test_squareMatrix.cpp
 )
 
-target_include_directories(tests PRIVATE include)
-target_link_libraries(tests gtest_main gtest)
+target_link_libraries(tests
+		PRIVATE
+		${PROJECT_NAME}
+		gtest
+		gtest_main
+)
 
-
+add_test(NAME unit_tests COMMAND tests)
 
 ##########################################################
-# Fixed CMakeLists.txt part
+# Optional: Install targets
 ##########################################################
-
-
-INSTALL(PROGRAMS
-		$<TARGET_FILE:${PROJECT_NAME}> # ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
-		DESTINATION bin)
-
-# Include CMake setup
-#include(cmake/main-config.cmake)
+install(TARGETS benchmark_runner eigenvalue_benchmark tests DESTINATION bin)
