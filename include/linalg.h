@@ -8,5 +8,6 @@
 #include "tensor.h"
 #include "matrix.h"
 #include "squareMatrix.h"
+#include "sparseMatrix.h"
 
 #endif // LINALG_H

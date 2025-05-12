@@ -93,6 +93,7 @@ add_executable(tests
 		tests/test_tenzor.cpp
 		tests/test_matrix.cpp
 		tests/test_squareMatrix.cpp
+		tests/test_sparseMatrix.cpp
 )
 
 target_link_libraries(tests
