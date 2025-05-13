@@ -10,6 +10,13 @@
 #include "vector.h"
 #include "linalg.h"
 
+#if LINALG_USE_THREADS
+  #include <tbb/concurrent_unordered_map.h>
+  using tbb::concurrent_unordered_map;
+#else
+    #include <unordered_map>
+#endif
+
 template <>
 struct std::hash<std::tuple<size_t, size_t>> {
     size_t operator()(const std::tuple<size_t, size_t>& key) const noexcept {
@@ -30,7 +37,11 @@ namespace linalg {
     class sparseMatrix {
     private:
         size_t rows_m, cols_m;
+#if LINALG_USE_THREADS
+        concurrent_unordered_map<coords, T> data_m;
+#else
         std::unordered_map<coords, T> data_m;
+#endif
 
     public:
         sparseMatrix(const size_t rows, const size_t cols, vector<T> data = {})
@@ -56,7 +67,7 @@ namespace linalg {
                 return;
             }
 
-            auto temp_data = std::unordered_map<coords, T>();
+            auto temp_data = decltype(data_m){};
 
             for (const auto& [key, value] : data_m) {
                 auto [row, col] = key;
@@ -91,13 +102,12 @@ namespace linalg {
             return  temp;
         }
 
-        T& operator()(const size_t row, const size_t col) {
-            return data_m[{row, col}];
+        T& operator()(size_t r, size_t c) {
+            return data_m[{r,c}];
         }
-
-        T operator()(const size_t row, const size_t col) const {
-            auto it = data_m.find({row, col});
-            return (it != data_m.end()) ? it->second : T();
+        T operator()(size_t r, size_t c) const {
+            auto it = data_m.find({r,c});
+            return it != data_m.end() ? it->second : T();
         }
 
         sparseMatrix<T> operator+=(const sparseMatrix<T>& other) {
@@ -109,53 +119,48 @@ namespace linalg {
         }
 
         sparseMatrix<T>& operator*=(const sparseMatrix<T>& other) {
-            if (this->cols_m != other.rows_m) {
-                throw std::invalid_argument("Wrong dimensions of matrices");
-            }
+            if (cols_m != other.rows_m)
+                throw std::invalid_argument("Wrong dimensions");
 
-            size_t rows = this->rows_m, cols = other.cols_m;
-            sparseMatrix<T> temp(rows, cols);
-
+            size_t R = rows_m, C = other.cols_m;
 #if LINALG_USE_THREADS
-            using namespace linalg::detail;
-            ThreadPool& pool = ThreadPool::instance();
-
+            // thread-safe accumulation into a TBB map
+            concurrent_unordered_map<coords, T> temp;
+            detail::ThreadPool& pool = detail::ThreadPool::instance();
             std::vector<std::future<void>> tasks;
-            std::vector<std::mutex> row_mutexes(rows);
 
-            for (const auto& [key, value] : this->data_m) {
-                auto [r, c] = key;
-
-                tasks.emplace_back(pool.enqueue([&, r, c, value] {
-                    std::lock_guard<std::mutex> lock(row_mutexes[r]);
-
-                    for (size_t i = 0; i < cols; ++i) {
-                        T otherValue = other(c, i);
-                        if (otherValue != T()) {
-                            T product = value * otherValue;
-                            temp(r, i) += product;
+            for (auto const& [key, v] : data_m) {
+                auto [r,c] = key;
+                tasks.emplace_back(pool.enqueue([&,r,c,v]{
+                    for (size_t j = 0; j < C; ++j) {
+                        T ov = other(c,j);
+                        if (ov != T()) {
+                            // operator[] on TBB map is safe for concurrent access
+                            temp[{r,j}] += v * ov;
                         }
                     }
                 }));
             }
+            for (auto &f : tasks) f.get();
 
-            for (auto& f : tasks)
-                f.get();
+            sparseMatrix<T> result(R, C);
+            for (auto const& kv : temp)
+                result.data_m.insert(kv);
+            *this = std::move(result);
 
 #else
-            for (const auto& [key, value] : this->data_m) {
-                auto [r, c] = key;
-
-                for (size_t i = 0; i < cols; ++i) {
-                    T otherValue = other(c, i);
-                    if (otherValue != T()) {
-                        temp(r, i) += value * otherValue;
-                    }
+            sparseMatrix<T> result(R, C);
+            for (auto const& [key, v] : data_m) {
+                auto [r,c] = key;
+                for (size_t j = 0; j < C; ++j) {
+                    T ov = other(c,j);
+                    if (ov != T())
+                        result(r,j) += v * ov;
                 }
             }
+            *this = std::move(result);
 #endif
 
-            *this = std::move(temp);
             return *this;
         }
 

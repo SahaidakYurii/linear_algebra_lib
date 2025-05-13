@@ -27,7 +27,10 @@ target_include_directories(${PROJECT_NAME} INTERFACE include)
 
 if(LINALG_USE_THREADS)
 	find_package(Threads REQUIRED)
-	target_link_libraries(${PROJECT_NAME} INTERFACE Threads::Threads)
+	find_package(TBB REQUIRED)
+	target_link_libraries(${PROJECT_NAME} INTERFACE
+			Threads::Threads
+			TBB::tbb)
 endif()
 
 ##########################################################
