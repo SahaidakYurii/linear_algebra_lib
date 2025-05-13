@@ -114,15 +114,15 @@ namespace linalg {
             size_t rows = this->rows_m, cols = other.cols_m;
             sparseMatrix<T> temp(rows, cols);
 
-            for (size_t r = 0; r < rows; r++) {
-                for (size_t c = 0; c < cols; c++) {
-                    T sum{};
-                    for (size_t i = 0; i < this->cols_m; i++) {
-                        sum += (*this)(r, i) * other(i, c);
-                    }
-                    temp(r, c) = sum;
+            for (const auto& [key, value] : this->data_m) {
+                auto [r, c] = key;
+
+                for (size_t i = 0; i < cols; i++) {
+                    if (T otherValue = other(c, i); otherValue != T())
+                        temp(r, i) += value * otherValue;
                 }
             }
+
             *this = temp;
             return *this;
         }
