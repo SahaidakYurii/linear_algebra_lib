@@ -22,7 +22,7 @@ TEST(SparseMatrixTest, Reshape) {
     EXPECT_EQ(m.rows(), 2);
     EXPECT_EQ(m.cols(), 2);
     EXPECT_EQ(m(0, 1), 5);
-    EXPECT_EQ(m(1, 1), 0);  // (2,2) is out of bounds after reshape
+    EXPECT_EQ(m(1, 1), 0);
 }
 
 TEST(SparseMatrixTest, Transpose) {

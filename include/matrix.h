@@ -231,7 +231,7 @@ namespace linalg {
             return basis_vectors;
         }
 
-    }; // class matrix
+    };
 
     template <typename T>
     matrix<T> operator*(matrix<T> fst, const matrix<T>& snd) {
@@ -257,12 +257,11 @@ namespace linalg {
         result += rhs;
         return result;
     }
-} // namespace linalg
+}
 
 #include "squareMatrix.h"
 
 namespace linalg {
-    // Tell the compiler that there *will* be a class template squareMatrix<T>
     template<typename U>
     class squareMatrix;
 }
@@ -273,6 +272,6 @@ namespace linalg{
         auto AtA = static_cast<squareMatrix<T>>(this->transpose() * (*this));
         return AtA.inverse() * this->transpose();
     }
-} // namespace linalg
+}
 
 #endif //LINALG_MATRIX_H

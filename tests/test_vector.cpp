@@ -247,9 +247,9 @@ TEST(vector, NestedPushBackSelfBack) {
     linalg::vector<linalg::vector<int>> v;
     linalg::vector<int> tmp = {1, 2};
     v.push_back(tmp);
-    v.push_back(v.back()); // Copy of the last vector
+    v.push_back(v.back());
 
     ASSERT_EQ(v.size(), 2);
-    EXPECT_EQ(v[1], v[0]); // Must be deep copy
+    EXPECT_EQ(v[1], v[0]);
 }
 

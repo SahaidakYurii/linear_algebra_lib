@@ -75,7 +75,7 @@ namespace linalg {
           capacity_(other.capacity_)
         {
             for (size_t i = 0; i < size_; ++i) {
-                new (&data_[i]) T(other.data_[i]);  // deep copy each element
+                new (&data_[i]) T(other.data_[i]);
             }
         }
 
@@ -90,8 +90,8 @@ namespace linalg {
         }
 
         ~vector() {
-            clear();  // Explicitly destroys all elements
-            ::operator delete(data_);  // Raw memory deallocation without calling destructors
+            clear();
+            ::operator delete(data_);
         }
 
         vector& operator=(const vector& other) {
@@ -322,6 +322,6 @@ namespace linalg {
         for (auto &val : v) sum += val * val;
         return std::sqrt(sum);
     }
-} // namespace linalg
+}
 
 #endif //LINALG_VECTOR_H

@@ -170,7 +170,7 @@ namespace linalg {
             return *this;
         }
 
-    }; // class sparseMatrix
+    };
 
     template <typename T>
     sparseMatrix<T> operator+(sparseMatrix<T> fst, const sparseMatrix<T>& snd) {

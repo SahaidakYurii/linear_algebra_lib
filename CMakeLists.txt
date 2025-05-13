@@ -60,7 +60,7 @@ target_include_directories(main PRIVATE ${eigen_SOURCE_DIR})
 # Benchmark executables
 ##########################################################
 
-# EIGEN add, mult comparison
+
 add_executable(benchmark_runner
 		benchmarks/benchmark.cpp
 		benchmarks/benchmark_utils.h
