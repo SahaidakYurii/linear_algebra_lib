@@ -277,7 +277,6 @@ namespace linalg {
 
         void push_back(const T& value) {
             if (size_ == capacity_) {
-                // handle self reference
                 T value_copy = value;
                 reserve(capacity_ ? capacity_ * 2 : 1);
                 new (&data_[size_++]) T(std::move(value_copy));

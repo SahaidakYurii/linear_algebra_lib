@@ -124,7 +124,6 @@ namespace linalg {
 
             size_t R = rows_m, C = other.cols_m;
 #if LINALG_USE_THREADS
-            // thread-safe accumulation into a TBB map
             concurrent_unordered_map<coords, T> temp;
             detail::ThreadPool& pool = detail::ThreadPool::instance();
             std::vector<std::future<void>> tasks;
@@ -135,7 +134,6 @@ namespace linalg {
                     for (size_t j = 0; j < C; ++j) {
                         T ov = other(c,j);
                         if (ov != T()) {
-                            // operator[] on TBB map is safe for concurrent access
                             temp[{r,j}] += v * ov;
                         }
                     }

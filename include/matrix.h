@@ -146,7 +146,6 @@ namespace linalg {
             size_t row = 0, col = 0;
 
             while (row < temp.rows_m && col < temp.cols_m) {
-                // Find pivot
                 size_t pivot = row;
                 for (size_t i = row + 1; i < temp.rows_m; ++i) {
                     if (std::abs(temp(i, col)) > std::abs(temp(pivot, col))) {
@@ -155,16 +154,14 @@ namespace linalg {
                 }
 
                 if (std::abs(temp(pivot, col)) < EPS) {
-                    ++col;  // No pivot in this column
+                    ++col;
                     continue;
                 }
 
-                // Swap current row with pivot row
                 for (size_t i = 0; i < temp.cols_m; ++i) {
                     std::swap(temp(row, i), temp(pivot, i));
                 }
 
-                // Eliminate below
                 for (size_t i = row + 1; i < temp.rows_m; ++i) {
                     T factor = temp(i, col) / temp(row, col);
                     for (size_t j = col; j < temp.cols_m; ++j) {
