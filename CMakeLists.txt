@@ -40,6 +40,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(eigen)
 
+find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui)
+
 ##########################################################
 # Main executables
 ##########################################################
@@ -50,6 +52,10 @@ target_link_libraries(main
 		PRIVATE ${PROJECT_NAME}
 )
 target_include_directories(main PRIVATE ${eigen_SOURCE_DIR})
+
+##########################################################
+# benchmark executables
+##########################################################
 
 ##########################################################
 # Benchmark executables
@@ -71,6 +77,17 @@ target_link_libraries(eigenvalue_benchmark
 )
 target_include_directories(eigenvalue_benchmark PRIVATE ${eigen_SOURCE_DIR})
 
+add_executable(benchmark_svd benchmarks/bench_svd.cpp)
+
+target_link_libraries(benchmark_svd
+		PRIVATE
+		${OpenCV_LIBS}
+		Eigen3::Eigen
+		${PROJECT_NAME}
+)
+
+target_include_directories(benchmark_svd PRIVATE ${OpenCV_INCLUDE_DIRS})
+
 ##########################################################
 # GoogleTest: Unit test executable
 ##########################################################
@@ -89,6 +106,7 @@ add_executable(tests
 		tests/test_tenzor.cpp
 		tests/test_matrix.cpp
 		tests/test_squareMatrix.cpp
+		tests/test_sparseMatrix.cpp
 )
 
 target_link_libraries(tests

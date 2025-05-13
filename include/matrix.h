@@ -263,6 +263,13 @@ namespace linalg {
 } // namespace linalg
 
 #include "squareMatrix.h"
+
+namespace linalg {
+    // Tell the compiler that there *will* be a class template squareMatrix<T>
+    template<typename U>
+    class squareMatrix;
+}
+
 namespace linalg{
     template <typename T>
     matrix<T> matrix<T>::pinv() const {
