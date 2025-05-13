@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "tensor.h"
+#include "thread_pool.h"
 
 namespace linalg {
     template <typename T>
@@ -90,24 +91,42 @@ namespace linalg {
             return temp;
         }
 
-        matrix<T>& operator*=(const matrix<T>& other) {
-            if (this->cols_m != other.rows_m) {
+        matrix<T>& operator*=(const matrix<T>& other)
+        {
+            if (this->cols_m != other.rows_m)
                 throw std::invalid_argument("Wrong dimensions of matrices");
-            }
 
             size_t rows = this->rows_m, cols = other.cols_m;
             matrix<T> temp(rows, cols);
 
-            for (size_t r = 0; r < rows; r++) {
-                for (size_t c = 0; c < cols; c++) {
-                    T sum{};
-                    for (size_t i = 0; i < this->cols_m; i++) {
-                        sum += (*this)(r, i) * other(i, c);
+#if LINALG_USE_THREADS
+            using namespace linalg::detail;
+            ThreadPool& pool = ThreadPool::instance();
+
+            std::vector<std::future<void>> tasks;
+            tasks.reserve(rows);
+
+            for (size_t r = 0; r < rows; ++r) {
+                tasks.emplace_back(pool.enqueue([&, r]{
+                    for (size_t c = 0; c < cols; ++c) {
+                        T sum{};
+                        for (size_t k = 0; k < this->cols_m; ++k)
+                            sum += (*this)(r,k) * other(k,c);
+                        temp(r,c) = sum;
                     }
-                    temp(r, c) = sum;
-                }
+                }));
             }
-            *this = temp;
+            for (auto& f : tasks) f.get();
+#else
+            for (size_t r = 0; r < rows; ++r)
+                for (size_t c = 0; c < cols; ++c) {
+                    T sum{};
+                    for (size_t k = 0; k < this->cols_m; ++k)
+                        sum += (*this)(r,k) * other(k,c);
+                    temp(r,c) = sum;
+                }
+#endif
+            *this = std::move(temp);
             return *this;
         }
 
@@ -244,6 +263,13 @@ namespace linalg {
 } // namespace linalg
 
 #include "squareMatrix.h"
+
+namespace linalg {
+    // Tell the compiler that there *will* be a class template squareMatrix<T>
+    template<typename U>
+    class squareMatrix;
+}
+
 namespace linalg{
     template <typename T>
     matrix<T> matrix<T>::pinv() const {

@@ -5,6 +5,14 @@ project(${PROJECT_NAME} C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
+option(LINALG_USE_THREADS "Enable internal linalg thread pool" ON)
+
+if(LINALG_USE_THREADS)
+	add_compile_definitions(LINALG_USE_THREADS=1)
+else()
+	add_compile_definitions(LINALG_USE_THREADS=0)
+endif()
+
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -17,6 +25,11 @@ include(FetchContent)
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE include)
 
+if(LINALG_USE_THREADS)
+	find_package(Threads REQUIRED)
+	target_link_libraries(${PROJECT_NAME} INTERFACE Threads::Threads)
+endif()
+
 ##########################################################
 # Dependencies: Eigen (header-only)
 ##########################################################
@@ -26,6 +39,8 @@ FetchContent_Declare(
 		GIT_TAG 3.4.0
 )
 FetchContent_MakeAvailable(eigen)
+
+find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui)
 
 ##########################################################
 # Main executables
@@ -37,6 +52,10 @@ target_link_libraries(main
 		PRIVATE ${PROJECT_NAME}
 )
 target_include_directories(main PRIVATE ${eigen_SOURCE_DIR})
+
+##########################################################
+# benchmark executables
+##########################################################
 
 ##########################################################
 # Benchmark executables
@@ -57,6 +76,17 @@ target_link_libraries(eigenvalue_benchmark
 		PRIVATE ${PROJECT_NAME}
 )
 target_include_directories(eigenvalue_benchmark PRIVATE ${eigen_SOURCE_DIR})
+
+add_executable(benchmark_svd benchmarks/bench_svd.cpp)
+
+target_link_libraries(benchmark_svd
+		PRIVATE
+		${OpenCV_LIBS}
+		Eigen3::Eigen
+		${PROJECT_NAME}
+)
+
+target_include_directories(benchmark_svd PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 ##########################################################
 # GoogleTest: Unit test executable
