@@ -9,7 +9,7 @@
 #include <condition_variable>
 
 #if !defined(LINALG_USE_THREADS)
-#  define LINALG_USE_THREADS 1   // default = ON
+#  define LINALG_USE_THREADS 0   // default = ON
 #endif
 
 namespace linalg::detail {

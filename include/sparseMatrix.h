@@ -14,7 +14,12 @@ template <>
 struct std::hash<std::tuple<size_t, size_t>> {
     size_t operator()(const std::tuple<size_t, size_t>& key) const noexcept {
         auto [row, col] = key;
-        return std::hash<size_t>()(row) ^ (std::hash<size_t>()(col) << 1);
+        size_t seed = std::hash<size_t>{}(row);
+        seed ^= std::hash<size_t>{}(col)
+                + 0x9e3779b97f4a7c15ULL
+                + (seed << 6)
+                + (seed >> 2);
+        return seed;
     }
 };
 
@@ -95,7 +100,7 @@ namespace linalg {
             return (it != data_m.end()) ? it->second : T();
         }
 
-        sparseMatrix<T> operator+=(const sparseMatrix<T>& other) const {
+        sparseMatrix<T> operator+=(const sparseMatrix<T>& other) {
             for (const auto& [key, value] : other.data_m) {
                 auto [r, c] = key;
                 data_m[{r, c}] += value;
