@@ -1,6 +1,4 @@
-//
-// Created by yurii-sahaidak on 5/13/25.
-//
+
 
 #ifndef BENCHMARK_UTILS_H
 #define BENCHMARK_UTILS_H
