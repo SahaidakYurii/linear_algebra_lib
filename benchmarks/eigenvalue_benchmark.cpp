@@ -10,7 +10,6 @@
 
 using namespace std;
 
-// Generate symmetric matrix of size n x n
 linalg::squareMatrix<double> generate_symmetric_matrix(size_t n) {
     linalg::vector<double> data(n * n, 0);
     std::mt19937 gen(random_device{}());
@@ -39,18 +38,15 @@ void run_benchmark(const std::string& output_csv, int min_size = 5, int max_size
 
         linalg::squareMatrix<double> my_mat = generate_symmetric_matrix(size);
 
-        // Copy to Eigen
         Eigen::MatrixXd eigen_mat(size, size);
         for (int r = 0; r < size; ++r)
             for (int c = 0; c < size; ++c)
                 eigen_mat(r, c) = my_mat(r, c);
 
-        // Your lib
         total_your_time += benchmark([&]() {
             volatile auto eigvals = my_mat.eigenvalues();
-        }, 1); // 1 rep here since outer loop controls it
+        }, 1);
 
-        // Eigen
         total_eigen_time += benchmark([&]() {
             Eigen::EigenSolver<Eigen::MatrixXd> solver(eigen_mat);
             volatile auto eigvals = solver.eigenvalues();

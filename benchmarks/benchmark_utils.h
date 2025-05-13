@@ -1,6 +1,4 @@
-//
-// Created by yurii-sahaidak on 5/13/25.
-//
+
 
 #ifndef BENCHMARK_UTILS_H
 #define BENCHMARK_UTILS_H
@@ -29,7 +27,7 @@ double benchmark(Func func, int repetitions = 10) {
         auto start = get_current_time_fenced();
         func();
         auto end = get_current_time_fenced();
-        total_time += to_us(end - start); // milliseconds
+        total_time += to_us(end - start);
     }
     return total_time / repetitions;
 }
