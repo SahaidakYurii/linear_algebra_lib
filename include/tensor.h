@@ -11,6 +11,7 @@
 #include <cmath>
 
 #include "vector.h"
+#include "thread_pool.h"
 
 namespace linalg {
     template <typename T, size_t N>
@@ -125,29 +126,42 @@ namespace linalg {
             return *this;
         }
 
-        tensor<T, N> multiply(const tensor<T, N>& other) const {
-            auto lhs_shape = this->dims_m;
-            auto rhs_shape = other.dims_m;
+        tensor<T,N> multiply(const tensor<T,N>& other) const
+        {
+            auto lhs = this->dims_m;
+            auto rhs = other.dims_m;
+            if (lhs[1] != rhs[0])
+                throw std::invalid_argument("Incompatible dimensions");
 
-            if (lhs_shape[1] != rhs_shape[0]) {
-                throw std::invalid_argument("Incompatible dimensions for matrix multiplication.");
-            }
+            size_t m = lhs[0], n = rhs[1], p = lhs[1];
+            vector<T> result(m * n, 0);
 
-            size_t m = lhs_shape[0];
-            size_t n = rhs_shape[1];
-            size_t p = lhs_shape[1];
-            vector<T> result_data(m * n, 0);
+#if LINALG_USE_THREADS
+            using namespace linalg::detail;
+            ThreadPool& pool = ThreadPool::instance();
+            std::vector<std::future<void>> tasks;
+            tasks.reserve(m);
 
             for (size_t i = 0; i < m; ++i) {
-                for (size_t j = 0; j < n; ++j) {
-                    for (size_t k = 0; k < p; ++k) {
-                        result_data[i * n + j] += this->data_m[i * p + k] * other.data_m[k * n + j];
+                tasks.emplace_back(pool.enqueue([&, i]{
+                    for (size_t j = 0; j < n; ++j) {
+                        T acc{};
+                        for (size_t k = 0; k < p; ++k)
+                            acc += this->data_m[i*p + k] * other.data_m[k*n + j];
+                        result[i*n + j] = acc;
                     }
-                }
+                }));
             }
-
-            return tensor<T, N>(result_data, m, n);
+            for (auto& f : tasks) f.get();
+#else
+            for (size_t i = 0; i < m; ++i)
+                for (size_t j = 0; j < n; ++j)
+                    for (size_t k = 0; k < p; ++k)
+                        result[i*n + j] += this->data_m[i*p + k] * other.data_m[k*n + j];
+#endif
+            return tensor<T,N>(result, m, n);
         }
+
 
         template <typename... Indices>
         T& operator()(Indices... indices) {

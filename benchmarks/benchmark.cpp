@@ -7,15 +7,32 @@
 
 using namespace std::chrono;
 
+#include <atomic>
+
+inline std::chrono::high_resolution_clock::time_point get_current_time_fenced()
+{
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+    auto res_time = std::chrono::high_resolution_clock::now();
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+    return res_time;
+}
+
+template<class D>
+inline double to_us(const D& d)
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
+}
+
 // Generic benchmarking function (in milliseconds)
 template <typename Func>
 double benchmark(Func func, int repetitions = 10) {
     double total_time = 0.0;
     for (int i = 0; i < repetitions; ++i) {
-        auto start = high_resolution_clock::now();
+        auto stage1_start_time = get_current_time_fenced();
         func();
-        auto end = high_resolution_clock::now();
-        total_time += duration<double, std::milli>(end - start).count();
+        auto finish_time = get_current_time_fenced();
+        auto local_time = finish_time - stage1_start_time;
+        total_time += to_us(local_time);
     }
     return total_time / repetitions;
 }

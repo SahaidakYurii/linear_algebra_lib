@@ -5,6 +5,14 @@ project(${PROJECT_NAME} C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
+option(LINALG_USE_THREADS "Enable internal linalg thread pool" ON)
+
+if(LINALG_USE_THREADS)
+	add_compile_definitions(LINALG_USE_THREADS=1)
+else()
+	add_compile_definitions(LINALG_USE_THREADS=0)
+endif()
+
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -16,6 +24,11 @@ include(FetchContent)
 ##########################################################
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE include)
+
+if(LINALG_USE_THREADS)
+	find_package(Threads REQUIRED)
+	target_link_libraries(${PROJECT_NAME} INTERFACE Threads::Threads)
+endif()
 
 ##########################################################
 # Dependencies: Eigen (header-only)
