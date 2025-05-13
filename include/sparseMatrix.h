@@ -6,20 +6,17 @@
 #include <stdexcept>
 #include <cmath>
 #include <sstream>
-#include <unordered_map>
-#include <tuple>
 #include <functional>
 #include "vector.h"
+#include "linalg.h"
 
-namespace std {
-    template <>
-    struct hash<std::tuple<size_t, size_t>> {
-        size_t operator()(const std::tuple<size_t, size_t>& key) const noexcept {
-            auto [row, col] = key;
-            return std::hash<size_t>()(row) ^ (std::hash<size_t>()(col) << 1);
-        }
-    };
-}
+template <>
+struct std::hash<std::tuple<size_t, size_t>> {
+    size_t operator()(const std::tuple<size_t, size_t>& key) const noexcept {
+        auto [row, col] = key;
+        return std::hash<size_t>()(row) ^ (std::hash<size_t>()(col) << 1);
+    }
+};
 
 namespace linalg {
     using coords = std::tuple<size_t, size_t>;
@@ -114,16 +111,46 @@ namespace linalg {
             size_t rows = this->rows_m, cols = other.cols_m;
             sparseMatrix<T> temp(rows, cols);
 
+#if LINALG_USE_THREADS
+            using namespace linalg::detail;
+            ThreadPool& pool = ThreadPool::instance();
+
+            std::vector<std::future<void>> tasks;
+            std::vector<std::mutex> row_mutexes(rows);
+
             for (const auto& [key, value] : this->data_m) {
                 auto [r, c] = key;
 
-                for (size_t i = 0; i < cols; i++) {
-                    if (T otherValue = other(c, i); otherValue != T())
-                        temp(r, i) += value * otherValue;
-                }
+                tasks.emplace_back(pool.enqueue([&, r, c, value] {
+                    std::lock_guard<std::mutex> lock(row_mutexes[r]);
+
+                    for (size_t i = 0; i < cols; ++i) {
+                        T otherValue = other(c, i);
+                        if (otherValue != T()) {
+                            T product = value * otherValue;
+                            temp(r, i) += product;
+                        }
+                    }
+                }));
             }
 
-            *this = temp;
+            for (auto& f : tasks)
+                f.get();
+
+#else
+            for (const auto& [key, value] : this->data_m) {
+                auto [r, c] = key;
+
+                for (size_t i = 0; i < cols; ++i) {
+                    T otherValue = other(c, i);
+                    if (otherValue != T()) {
+                        temp(r, i) += value * otherValue;
+                    }
+                }
+            }
+#endif
+
+            *this = std::move(temp);
             return *this;
         }
 
