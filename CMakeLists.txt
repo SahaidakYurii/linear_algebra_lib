@@ -27,7 +27,10 @@ target_include_directories(${PROJECT_NAME} INTERFACE include)
 
 if(LINALG_USE_THREADS)
 	find_package(Threads REQUIRED)
-	target_link_libraries(${PROJECT_NAME} INTERFACE Threads::Threads)
+	find_package(TBB REQUIRED)
+	target_link_libraries(${PROJECT_NAME} INTERFACE
+			Threads::Threads
+			TBB::tbb)
 endif()
 
 ##########################################################
@@ -54,30 +57,37 @@ target_link_libraries(main
 target_include_directories(main PRIVATE ${eigen_SOURCE_DIR})
 
 ##########################################################
-# benchmark executables
-##########################################################
-
-##########################################################
 # Benchmark executables
 ##########################################################
 
+
 add_executable(benchmark_runner
 		benchmarks/benchmark.cpp
+		benchmarks/benchmark_utils.h
 )
 target_link_libraries(benchmark_runner
 		PRIVATE ${PROJECT_NAME}
 )
 target_include_directories(benchmark_runner PRIVATE ${eigen_SOURCE_DIR})
+target_include_directories(benchmark_runner PRIVATE benchmarks)
 
+# EIGEN eigenvalue comparison
 add_executable(eigenvalue_benchmark
 		benchmarks/eigenvalue_benchmark.cpp
+		benchmarks/benchmark_utils.h
 )
 target_link_libraries(eigenvalue_benchmark
 		PRIVATE ${PROJECT_NAME}
 )
 target_include_directories(eigenvalue_benchmark PRIVATE ${eigen_SOURCE_DIR})
+target_include_directories(benchmark_runner PRIVATE benchmarks)
 
-add_executable(benchmark_svd benchmarks/bench_svd.cpp)
+# EIGEN svd comparison
+
+add_executable(benchmark_svd
+		benchmarks/bench_svd.cpp
+		benchmarks/benchmark_utils.h
+)
 
 target_link_libraries(benchmark_svd
 		PRIVATE
@@ -87,6 +97,19 @@ target_link_libraries(benchmark_svd
 )
 
 target_include_directories(benchmark_svd PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_include_directories(benchmark_svd PRIVATE benchmarks)
+
+# sparse vs matrix comparison
+add_executable(sparseMatrix_benchmark
+		benchmarks/sparseMatrix_benchmark.cpp
+		benchmarks/benchmark_utils.h
+)
+
+target_link_libraries(sparseMatrix_benchmark
+		PRIVATE ${PROJECT_NAME}
+)
+
+target_include_directories(sparseMatrix_benchmark PRIVATE benchmarks)
 
 ##########################################################
 # GoogleTest: Unit test executable

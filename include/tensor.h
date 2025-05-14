@@ -221,5 +221,5 @@ namespace linalg {
         tensor<T, N> result(fst);
         return result -= snd;
     }
-} // namespace linalg
+}
 #endif //LINALG_NDMATRIX_H

@@ -8,6 +8,7 @@
 using namespace std::chrono;
 
 #include <atomic>
+#include "benchmark_utils.h"
 
 inline std::chrono::high_resolution_clock::time_point get_current_time_fenced()
 {
@@ -35,6 +36,8 @@ double benchmark(Func func, int repetitions = 10) {
     }
     return total_time / repetitions;
 }
+
+
 
 void run_addition_benchmark(std::ofstream& file, int size, int repetitions) {
     linalg::matrix<float> my_a(size, size), my_b(size, size);

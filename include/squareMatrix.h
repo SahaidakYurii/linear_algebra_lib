@@ -61,7 +61,7 @@ namespace linalg {
             matrix<T>(a, a, data), a(a) {}
 
         explicit squareMatrix(const matrix<T> &other)
-        : matrix<T>(other),  // or matrix<T>(other.data_m, other.rows_m, other.cols_m)
+        : matrix<T>(other),
           a(other.rows_m)
         {
             if (other.rows_m != other.cols_m) {
@@ -338,21 +338,17 @@ namespace linalg {
 
         std::tuple<squareMatrix<T>,squareMatrix<T>,squareMatrix<T>>
         svd(double tol=1e-9) const {
-            // form B = AᵀA
             auto At  = this->transpose();
             auto Bt  = At.multiply(*this);
             squareMatrix<T> B(a, Bt.get_data());
 
-            // eigendecomp B -> V, λ
             auto lambdas = B.eigenvalues(tol);
             auto V       = B.eigenvectorsViaNullspace(tol);
 
-            // Σ
             squareMatrix<T> S(a);
             for (size_t i=0;i<a;++i)
                 S(i,i)=std::sqrt(std::max<T>(lambdas[i],T{0}));
 
-            // U
             squareMatrix<T> U(a);
             for (size_t i=0;i<a;++i) {
                 T sigma=S(i,i);
@@ -368,7 +364,7 @@ namespace linalg {
                         U(r,i)=Avi[r]/sigma;
                 }
             }
-            auto M = V.transpose();                // M is a matrix<T>
+            auto M = V.transpose();
             squareMatrix<T> VT{ std::move(M) };
             return std::tuple< squareMatrix<T>,
                     squareMatrix<T>,
@@ -385,7 +381,6 @@ namespace linalg {
             squareMatrix<T> U(this->a);
 
             for (size_t i = 0; i < this->a; i++) {
-                // Fill U
                 for (size_t j = i; j < this->a; j++) {
                     T sum = 0;
                     for (size_t k = 0; k < i; k++) {
@@ -394,7 +389,6 @@ namespace linalg {
                     U(i, j) = (*this)(i, j) - sum;
                 }
 
-                // Fill L
                 for (size_t j = i; j < this->a; j++) {
                     if (i == j) {
                         L(i, i) = 1;
@@ -443,25 +437,20 @@ namespace linalg {
             vector<vector<T>> eigenvectors;
 
             for (T lambda : eigenvalues) {
-                // Form A - lambda * I
                 squareMatrix<T> shifted = *this;
                 for (size_t i = 0; i < this->a; ++i) {
                     shifted(i, i) -= lambda;
                 }
 
-                // We'll try to find x such that (A - λI)x = 0
-                // Let’s feed a random b and normalize the result
-                vector<T> b(this->a, 1.0); // or random vector, if you prefer
+                vector<T> b(this->a, 1.0);
                 vector<T> x;
 
                 try {
-                    x = shifted.solve(b);  // Will fail if matrix is singular
+                    x = shifted.solve(b);
                 } catch (...) {
-                    // Matrix likely singular => try alternate approach
                     x = vector<T>(this->a, 0);
                 }
 
-                // Normalize eigenvector
                 T norm = vectorNorm(x);
                 if (norm > tol) {
                     for (T& val : x) val /= norm;
@@ -482,6 +471,6 @@ namespace linalg {
         lhs += rhs;
         return lhs;
     }
-} // namespace linalg
+}
 
 #endif //SQUAREMATRIX_H

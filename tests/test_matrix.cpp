@@ -82,7 +82,6 @@ TEST(MatrixTests, PseudoInverse) {
     linalg::matrix<double> A(3, 2, {1, 2, 3, 4, 5, 6});
     auto A_p = A.pinv();
 
-    // A * A.pinv() * A == A
     auto AA_pA = A * A_p * A;
     for (size_t r = 0; r < A.rows(); ++r) {
         for (size_t c = 0; c < A.cols(); ++c) {
@@ -90,7 +89,6 @@ TEST(MatrixTests, PseudoInverse) {
         }
     }
 
-    // A.pinv() * A * A.pinv() == A.pinv()
     auto A_pAA_p = A_p * A * A_p;
     for (size_t r = 0; r < A.rows(); ++r) {
         for (size_t c = 0; c < A.cols(); ++c) {
@@ -98,7 +96,6 @@ TEST(MatrixTests, PseudoInverse) {
         }
     }
 
-    // Check if A.pinv() * A is symmetrical
     auto ApA = A_p * A;
     ASSERT_EQ(ApA.rows(), ApA.cols()) << "A.pinv() * A is not square!";
     for (size_t i = 0; i < ApA.rows(); ++i) {

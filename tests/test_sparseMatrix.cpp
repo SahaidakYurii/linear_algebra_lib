@@ -22,7 +22,7 @@ TEST(SparseMatrixTest, Reshape) {
     EXPECT_EQ(m.rows(), 2);
     EXPECT_EQ(m.cols(), 2);
     EXPECT_EQ(m(0, 1), 5);
-    EXPECT_EQ(m(1, 1), 0);  // (2,2) is out of bounds after reshape
+    EXPECT_EQ(m(1, 1), 0);
 }
 
 TEST(SparseMatrixTest, Transpose) {
@@ -62,4 +62,23 @@ TEST(SparseMatrixTest, MatrixMultiplication) {
     EXPECT_EQ(c(0, 0), 3);
     EXPECT_EQ(c(1, 1), 8);
     EXPECT_EQ(c(0, 1), 0);
+}
+
+TEST(SparseMatrixTest, MatrixMultiplicationDataRace) {
+    constexpr size_t N = 100;
+    sparseMatrix<int> a(1, N);
+    sparseMatrix<int> b(N, N);
+
+    for (size_t i = 0; i < N; ++i)
+        a(0, i) = 1;
+
+    for (size_t i = 0; i < N; ++i)
+        for (size_t j = 0; j < N; ++j)
+            b(i, j) = 1;
+
+    auto c = a * b;
+
+    for (size_t i = 1; i < N; ++i) {
+        EXPECT_EQ(c(0, i), 100);
+    }
 }
