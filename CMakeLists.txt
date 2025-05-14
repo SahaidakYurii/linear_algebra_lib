@@ -5,7 +5,7 @@ project(${PROJECT_NAME} C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-option(LINALG_USE_THREADS "Enable internal linalg thread pool" ON)
+option(LINALG_USE_THREADS "Enable internal linalg thread pool" OFF)
 
 if(LINALG_USE_THREADS)
 	add_compile_definitions(LINALG_USE_THREADS=1)

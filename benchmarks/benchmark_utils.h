@@ -9,7 +9,7 @@
 template<class D>
 inline double to_us(const D& d)
 {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
+    return std::chrono::duration_cast<std::chrono::microseconds>(d).count();
 }
 
 inline std::chrono::high_resolution_clock::time_point get_current_time_fenced()

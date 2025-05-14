@@ -1,4 +1,7 @@
 ### C++ ###
+
+*env
+
 # Prerequisites
 *.d
 cmake*

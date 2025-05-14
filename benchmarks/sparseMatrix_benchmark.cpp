@@ -50,7 +50,7 @@ int main() {
 
     const int repetitions = 1;
     const std::vector<int> sizes   = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
-    const std::vector<float> densities = {0.01f, 0.02f, 0.03f, 0.4f, 0.05f, 0.1f, 0.2f, 0.5f, 1.0f};
+    const std::vector<float> densities = {0.01f, 0.02f, 0.03f, 0.04f, 0.05f, 0.1f, 0.2f, 0.5f, 1.0f};
 
     for (const int sz : sizes) {
         std::cout << "Size=" << sz << "  ";
