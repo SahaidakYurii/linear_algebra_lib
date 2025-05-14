@@ -102,17 +102,50 @@ namespace linalg {
             return data_m;
         }
 
+        // tensor operator+= (const tensor<T, N>& other) {
+        //     if (this->dims_m != other.dims_m) {
+        //         throw std::invalid_argument("Matrices must have the same dimensions");
+        //     }
+        //
+        //     for (size_t i = 0; i < total_size(); ++i) {
+        //         this->data_m[i] += other.data_m[i];
+        //     }
+        //
+        //     return *this;
+        // }
+
         tensor operator+= (const tensor<T, N>& other) {
             if (this->dims_m != other.dims_m) {
                 throw std::invalid_argument("Matrices must have the same dimensions");
             }
 
-            for (size_t i = 0; i < total_size(); ++i) {
-                this->data_m[i] += other.data_m[i];
-            }
+#if LINALG_USE_THREADS
+            using namespace linalg::detail;
+            ThreadPool& pool = ThreadPool::instance();
 
+            const size_t total = total_size();
+            const size_t hw    = std::max<size_t>(1, pool.size());
+            const size_t chunk = (total + hw - 1) / hw;
+
+            std::vector<std::future<void>> tasks;
+            tasks.reserve(hw);
+
+            for (size_t start = 0; start < total; start += chunk) {
+                const size_t end = std::min(total, start + chunk);
+
+                tasks.emplace_back(pool.enqueue([this, &other, start, end] {
+                    for (size_t i = start; i < end; ++i)
+                        this->data_m[i] += other.data_m[i];
+                }));
+            }
+            for (auto& f : tasks) f.get();
+#else
+            for (size_t i = 0; i < total_size(); ++i)
+                this->data_m[i] += other.data_m[i];
+#endif
             return *this;
         }
+
 
         tensor operator-= (const tensor<T, N>& other) {
             if (this->dims_m != other.dims_m) {
