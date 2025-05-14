@@ -10,7 +10,7 @@ option(LINALG_USE_THREADS "Enable internal linalg thread pool" ON)
 if(LINALG_USE_THREADS)
 	add_compile_definitions(LINALG_USE_THREADS=1)
 else()
-	add_compile_definitions(LINALG_USE_THREADS=0)
+	add_compile_definitions(LINALG_USE_THREADS=1)
 endif()
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -40,7 +40,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(eigen)
 
-find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui)
+#find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui)
 
 ##########################################################
 # Main executables

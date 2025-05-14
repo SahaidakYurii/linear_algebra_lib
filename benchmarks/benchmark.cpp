@@ -20,10 +20,9 @@ inline std::chrono::high_resolution_clock::time_point get_current_time_fenced()
 template<class D>
 inline double to_us(const D& d)
 {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
+    return std::chrono::duration_cast<std::chrono::microseconds>(d).count();
 }
 
-// Generic benchmarking function (in milliseconds)
 template <typename Func>
 double benchmark(Func func, int repetitions = 10) {
     double total_time = 0.0;
